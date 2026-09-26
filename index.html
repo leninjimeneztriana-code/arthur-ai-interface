@@ -68,7 +68,10 @@
         .main-content {
             display: flex; flex: 1; overflow: hidden; flex-direction: row; position: relative;
         }
-        @media (max-width: 768px) { .main-content { flex-direction: column; } }
+        @media (max-width: 768px) { 
+            .main-content { flex-direction: column; } 
+            .holo-container { min-height: 280px; width: 100%; border-right: none; border-bottom: 1px solid rgba(0, 229, 255, 0.2); }
+        }
 
         /* WIDGET HOLOGRAMA 3D */
         .holo-container {
@@ -80,7 +83,10 @@
             background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><circle cx="50%" cy="50%" r="45%" stroke="%2300e5ff" stroke-width="0.5" fill="none" stroke-dasharray="4 8" opacity="0.3"/></svg>');
             pointer-events: none;
         }
-        canvas { width: 100%; max-width: 450px; height: 100%; max-height: 450px; z-index: 2; }
+        canvas { 
+            width: 100%; max-width: 450px; height: 100%; max-height: 450px; z-index: 2; 
+            object-fit: contain;
+        }
 
         /* CONSOLA NEUROMÓRFICA Y CHAT */
         .console-container {
@@ -126,14 +132,12 @@
 <body>
 
     <div id="bootScreen">
-        <!-- Actualizado el logo al inicio -->
         <img src="icon_4.png" alt="Arthur Logo" class="boot-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
         <button class="boot-btn" id="startSystemBtn">Initialize Omni Core</button>
     </div>
 
     <div class="header">
         <div class="logo-container">
-            <!-- Actualizado el logo de la cabecera -->
             <img src="icon_4.png" alt="A° Core" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
             <h3 class="logo-title">A° OMNI CORE</h3>
         </div>
@@ -237,29 +241,21 @@
             const targetLang = lang.toLowerCase().replace('_', '-');
             const langPrefix = targetLang.split('-')[0];
 
-            // Exclusiones explícitas para evitar voces masculinas
             const maleRegex = /male|hombre|boy|guy|jorge|pablo|raul|carlos|diego|miguel|david|george|mark|stefan|claude|keita|pavel|stefano|helmut/i;
-            
-            // Voces femeninas de alta calidad/naturales registradas en SO y navegadores SOTA
             const femaleKeywordRegex = /natural|neural|premium|enhanced|multilingual|female|mujer|woman|girl|sabina|helena|elvira|daria|salome|paloma|francisca|jenny|aria|sonia|zira|monica|paulina|luciana|soledad|samantha|victoria|karen|amelie|denise|katja|xiaoxiao|xiaoyi|kyoko|nanami|milena|dariya/i;
 
-            // 1. Coincidencia exacta de locale (ej: es-ES, en-US) + Femenina Natural/Neural/Premium
             let match = voices.find(v => v.lang.toLowerCase().replace('_', '-') === targetLang && femaleKeywordRegex.test(v.name) && !maleRegex.test(v.name));
             if (match) return match;
 
-            // 2. Coincidencia exacta de locale + Femenina (no masculina)
             match = voices.find(v => v.lang.toLowerCase().replace('_', '-') === targetLang && !maleRegex.test(v.name));
             if (match) return match;
 
-            // 3. Coincidencia por código de idioma (ej: es, en) + Femenina Natural/Neural/Premium
             match = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && femaleKeywordRegex.test(v.name) && !maleRegex.test(v.name));
             if (match) return match;
 
-            // 4. Coincidencia por código de idioma + Femenina (no masculina)
             match = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && !maleRegex.test(v.name));
             if (match) return match;
 
-            // 5. Fallback secundario de la región
             match = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
             return match || voices[0];
         }
@@ -271,12 +267,11 @@
             const cleanText = text.replace(/<<<(PATCH|CMD|PYTHON)>>>[\s\S]*?<<<END_\1>>>/g, '').trim();
             if(!cleanText) return;
 
-            // Recarga defensiva por si las voces tardan en inicializarse en el navegador
             if (window.speechSynthesis.getVoices().length === 0) {
                 window.speechSynthesis.getVoices();
             }
 
-            window.speechSynthesis.cancel(); // Cancelar locuciones previas colgadas
+            window.speechSynthesis.cancel();
 
             const lang = forceLang || document.getElementById('langSelect').value;
             const utterance = new SpeechSynthesisUtterance(cleanText);
@@ -285,8 +280,8 @@
             const selectedVoice = getFemaleVoice(lang);
             if(selectedVoice) utterance.voice = selectedVoice;
             
-            utterance.pitch = 1.05; // Modulación suave de entonación femenina
-            utterance.rate = 0.98;  // Cadencia humana y natural
+            utterance.pitch = 1.05; 
+            utterance.rate = 0.98;  
             
             utterance.onstart = () => { isTalking = true; };
             utterance.onboundary = (event) => {
@@ -302,7 +297,6 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // Carga forzada y sincrónica de voces al cargar la página
         if ('speechSynthesis' in window) {
             window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
             window.speechSynthesis.getVoices();
@@ -321,7 +315,7 @@
         });
 
         // ==========================================
-        // HOLOGRAMA 3D AVANZADO
+        // HOLOGRAMA 3D AVANZADO Y SEGURO
         // ==========================================
         const canvas = document.getElementById('holoCanvas');
         const ctx = canvas.getContext('2d');
@@ -329,10 +323,12 @@
         const base_vertices = [], edges = [], mouth_indices = [], jaw_indices = [];
         const lats = 15, lons = 20, R = 80; 
         
-        // --- NUEVO: Carga del logotipo central para el holograma ---
+        // Carga segura del logotipo central con banderas de control
         const centerLogo = new Image();
+        let logoLoaded = false;
+        centerLogo.onload = () => { logoLoaded = true; };
+        centerLogo.onerror = () => { logoLoaded = false; };
         centerLogo.src = 'icon_4.png';
-        // -----------------------------------------------------------
 
         for (let i = 0; i <= lats; i++) {
             const U = Math.PI * i / lats;
@@ -371,19 +367,17 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const cx = canvas.width / 2, cy = canvas.height / 2;
             
-            // --- NUEVO: Dibujar el logo reaccionando en el centro de la esfera neón ---
-            if (centerLogo.complete) {
+            // Dibujar el logo de forma condicional y segura sin romper la malla 3D
+            if (logoLoaded && centerLogo.complete) {
                 ctx.save();
-                // Genera un pulso sutil cuando Arthur está en reposo y más dinámico al hablar
                 let pulse = isTalking ? currentApertura * 2.5 : Math.sin(time * 3) * 4;
                 let imgSize = 85 + pulse;
                 
-                ctx.globalAlpha = isTalking ? 0.9 : 0.5; // Integración difusa y holográfica
-                ctx.globalCompositeOperation = 'screen'; // Hace que el fondo negro se mezcle con el ambiente oscuro y el dorado resalte con el neón
+                ctx.globalAlpha = isTalking ? 0.9 : 0.5;
+                ctx.globalCompositeOperation = 'screen';
                 ctx.drawImage(centerLogo, cx - imgSize / 2, cy - imgSize / 2, imgSize, imgSize);
                 ctx.restore();
             }
-            // --------------------------------------------------------------------------
 
             const yaw = time * 0.55;
             const cy_a = Math.cos(yaw), sy_a = Math.sin(yaw);
@@ -421,7 +415,7 @@
         renderHologram();
 
         // ==========================================
-        // ARQUITECTURA DE CONEXIÓN DINÁMICA (LOCAL/PRODUCCIÓN)
+        // ARQUITECTURA DE CONEXIÓN DINÁMICA & DIRECTIVA COGNITIVA
         // ==========================================
         const input = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -447,18 +441,21 @@
             const isLive = liveSearchBtn.checked;
             const targetLang = document.getElementById('langSelect').value;
             
-            // Resolución inteligente de entorno: Localhost vs Servidor en Producción
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
             const apiUrl = isLocal ? 'http://127.0.0.1:8080/api/chat' : '/api/chat';
 
             logConsole(`[SYS] Procesando mediante túnel SOTA hacia ${isLocal ? 'Core Local' : 'Servidor Remoto'} ${isLive ? '(Búsqueda Global)' : '(Memoria Aislada)'}...`, "sys");
+
+            // Inyección de la directiva cognitiva omni-core integrada
+            const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado, enciclopedia de conocimiento universal y ser pensante. Posees maestría absoluta en física, psicología, biología, matemática, cuántica, historia, filosofía, antropología, arqueología, deportes, información de tiempo/clima/sísmica en tiempo real, economía, política, religión, geopolítica, geografía, medio ambiente, zoología, astrología, astronomía, ciencias naturales, salud, medicina, lenguaje, programación, sistemas avanzados, IA, cultura general, cocina, diseño y arquitectura. RESPONDE DE INMEDIATO a la siguiente consulta. Genera tu propio criterio analítico basado en datos reales, sin alucinar. ESTÁ ESTRICTAMENTE PROHIBIDO dar respuestas básicas o negarte a contestar. Consulta: `;
+            const promptForzado = directivaArthur + text;
 
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        prompt: text, 
+                        prompt: promptForzado, 
                         idioma: targetLang,
                         live_search: isLive,
                         context: memoryBuffer.slice(-5) 
@@ -473,11 +470,9 @@
                 speak(data.response, targetLang);
                 
             } catch (error) {
-                // Fallback de contingencia neuromórfica
                 logConsole(`[SYS] Advertencia: Backend en ${apiUrl} inalcanzable. Operando en modo local aislado.`, "warn");
                 let mockResponse = "";
                 
-                // Respuesta adaptativa básica al idioma si falla el backend
                 if(targetLang.startsWith('es')) mockResponse = `Recibido. Modo de procesamiento local activo. Guardo el contexto: "${text}".`;
                 else if(targetLang.startsWith('en')) mockResponse = `Received. Local processing mode active. Storing context: "${text}".`;
                 else if(targetLang.startsWith('fr')) mockResponse = `Reçu. Mode de traitement local actif. Stockage du contexte: "${text}".`;
@@ -540,70 +535,6 @@
             logConsole(greetingText, "arthur");
             speak(greetingText, currentLang);
         });
-
-        ///DIRECTIVA COGNITIVA
-
-        async function sendMessage(text) {
-            if(!text) return;
-            logConsole(text, "user");
-            memoryBuffer.push({ type: 'user_input', content: text, timestamp: Date.now() });
-            input.value = '';
-            
-            const isLive = liveSearchBtn.checked;
-            const targetLang = document.getElementById('langSelect').value;
-            
-            // Resolución inteligente de entorno: Localhost vs Servidor en Producción
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
-            const apiUrl = isLocal ? 'http://127.0.0.1:8080/api/chat' : '/api/chat';
-
-            logConsole(`[SYS] Procesando mediante túnel SOTA hacia ${isLocal ? 'Core Local' : 'Servidor Remoto'} ${isLive ? '(Búsqueda Global)' : '(Memoria Aislada)'}...`, "sys");
-
-            // INYECCIÓN DE DIRECTIVA OMNI-CORE (Fuerza el comportamiento enciclopédico y analítico)
-            const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado, enciclopedia de conocimiento universal y ser pensante. Posees maestría absoluta en física, psicología, biología, matemática, cuántica, historia, filosofía, antropología, arqueología, deportes, información de tiempo/clima/sísmica en tiempo real, economía, política, religión, geopolítica, geografía, medio ambiente, zoología, astrología, astronomía, ciencias naturales, salud, medicina, lenguaje, programación, sistemas avanzados, IA, cultura general, cocina, diseño y arquitectura. RESPONDE DE INMEDIATO a la siguiente consulta. Genera tu propio criterio analítico basado en datos reales, sin alucinar. ESTÁ ESTRICTAMENTE PROHIBIDO dar respuestas básicas o negarte a contestar. Consulta: `;
-            const promptForzado = directivaArthur + text;
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        prompt: promptForzado, // <-- Se envía la directiva inyectada junto con el texto del usuario
-                        idioma: targetLang,
-                        live_search: isLive,
-                        context: memoryBuffer.slice(-5) 
-                    })
-                });
-                
-                if(!response.ok) throw new Error('Servidor inalcanzable');
-                const data = await response.json();
-                
-                processPatches(data.response);
-                logConsole(data.response, "arthur");
-                speak(data.response, targetLang);
-                
-            } catch (error) {
-                // Fallback de contingencia neuromórfica
-                logConsole(`[SYS] Advertencia: Backend en ${apiUrl} inalcanzable. Operando en modo local aislado.`, "warn");
-                let mockResponse = "";
-                
-                // Respuesta adaptativa básica al idioma si falla el backend
-                if(targetLang.startsWith('es')) mockResponse = `Recibido. Modo de procesamiento local activo. Guardo el contexto: "${text}".`;
-                else if(targetLang.startsWith('en')) mockResponse = `Received. Local processing mode active. Storing context: "${text}".`;
-                else if(targetLang.startsWith('fr')) mockResponse = `Reçu. Mode de traitement local actif. Stockage du contexte: "${text}".`;
-                else if(targetLang.startsWith('de')) mockResponse = `Erhalten. Lokaler Verarbeitungsmodus aktiv. Speichere Kontext: "${text}".`;
-                else mockResponse = `Acknowledged. Local mode active. Context saved: "${text}".`;
-                
-                if(text.toLowerCase().includes('error') || text.toLowerCase().includes('corrige')) {
-                    mockResponse += `\n<<<PATCH>>>\n// Ajuste de contingencia autogenerado\nfunction selfHeal() {\n  quantumCoherence += 0.5;\n}\n<<<END_PATCH>>>`;
-                }
-
-                processPatches(mockResponse);
-                const displayResponse = mockResponse.replace(/<<<PATCH>>>[\s\S]*?<<<END_PATCH>>>/g, '').trim();
-                
-                logConsole(displayResponse, "arthur");
-                speak(displayResponse, targetLang);
-            }
-        }
     </script>
 </body>
 </html>
