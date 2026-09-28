@@ -532,7 +532,7 @@
         sendBtn.addEventListener('click', () => sendMessage(input.value));
         input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(input.value); });
 
-        // DICTADO POR VOZ (Optimizado para reinstanciarse por toque en Móviles)
+        // DICTADO POR VOZ (Optimizado con corrección para celulares)
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
 
@@ -548,9 +548,24 @@
                 recognition.lang = document.getElementById('langSelect').value;
                 
                 recognition.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
+                    // Forzamos la lectura del último resultado capturado para mayor precisión
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        transcript += event.results[i][0].transcript;
+                    }
                     input.value = transcript;
                     sendMessage(transcript);
+                };
+
+                // FIX MÓVILES: Fuerza a terminar el proceso de reconocimiento y entregar el resultado al detectar fin de habla
+                recognition.onspeechend = () => {
+                    recognition.stop();
+                };
+
+                // FIX MÓVILES: Manejo de errores para que la UI no se quede bloqueada
+                recognition.onerror = (event) => {
+                    logConsole(`[SYS] Error en reconocimiento: ${event.error}`, "warn");
+                    micBtn.classList.remove('recording');
                 };
 
                 recognition.onend = () => {
