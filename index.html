@@ -423,6 +423,7 @@
         const liveSearchBtn = document.getElementById('liveSearchToggle');
 
         function processPatches(responseText) {
+            if(!responseText) return;
             const patchRegex = /<<<PATCH>>>([\s\S]*?)<<<END_PATCH>>>/g;
             let match;
             while ((match = patchRegex.exec(responseText)) !== null) {
@@ -441,10 +442,14 @@
             const isLive = liveSearchBtn.checked;
             const targetLang = document.getElementById('langSelect').value;
             
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
-            const apiUrl = isLocal ? 'http://127.0.0.1:8080/api/chat' : '/api/chat';
+            // ==========================================
+            // CONEXIÓN DIRECTA A LLM (SIN ARCHIVOS PYTHON)
+            // ==========================================
+            // Apunta directamente a la API REST de Ollama en tu sistema local
+            const apiUrl = 'http://localhost:11434/api/generate';
+            const modeloLLM = 'llama3'; // Cámbialo si usas mistral, phi3 u otro en tu Ollama
 
-            logConsole(`[SYS] Procesando mediante túnel SOTA hacia ${isLocal ? 'Core Local' : 'Servidor Remoto'} ${isLive ? '(Búsqueda Global)' : '(Memoria Aislada)'}...`, "sys");
+            logConsole(`[SYS] Conectando directamente a Motor LLM en ${apiUrl}...`, "sys");
 
             // Inyección de la directiva cognitiva omni-core integrada
             const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado, enciclopedia de conocimiento universal y ser pensante. Posees maestría absoluta en física, psicología, biología, matemática, cuántica, historia, filosofía, antropología, arqueología, deportes, información de tiempo/clima/sísmica en tiempo real, economía, política, religión, geopolítica, geografía, medio ambiente, zoología, astrología, astronomía, ciencias naturales, salud, medicina, lenguaje, programación, sistemas avanzados, IA, cultura general, cocina, diseño y arquitectura. RESPONDE DE INMEDIATO a la siguiente consulta. Genera tu propio criterio analítico basado en datos reales, sin alucinar. ESTÁ ESTRICTAMENTE PROHIBIDO dar respuestas básicas o negarte a contestar. Consulta: `;
@@ -455,22 +460,24 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
+                        model: modeloLLM,
                         prompt: promptForzado, 
-                        idioma: targetLang,
-                        live_search: isLive,
-                        context: memoryBuffer.slice(-5) 
+                        stream: false
                     })
                 });
                 
-                if(!response.ok) throw new Error('Servidor inalcanzable');
+                if(!response.ok) throw new Error('Servidor LLM inalcanzable. Verifica que Ollama se esté ejecutando.');
                 const data = await response.json();
                 
-                processPatches(data.response);
-                logConsole(data.response, "arthur");
-                speak(data.response, targetLang);
+                // Ollama devuelve la estructura en data.response
+                const textoRespuesta = data.response;
+                
+                processPatches(textoRespuesta);
+                logConsole(textoRespuesta, "arthur");
+                speak(textoRespuesta, targetLang);
                 
             } catch (error) {
-                logConsole(`[SYS] Advertencia: Backend en ${apiUrl} inalcanzable. Operando en modo local aislado.`, "warn");
+                logConsole(`[SYS] Advertencia: Conexión fallida con el LLM en ${apiUrl}. Operando en modo de contingencia aislado.`, "warn");
                 let mockResponse = "";
                 
                 if(targetLang.startsWith('es')) mockResponse = `Recibido. Modo de procesamiento local activo. Guardo el contexto: "${text}".`;
