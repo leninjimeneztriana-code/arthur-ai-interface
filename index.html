@@ -2,633 +2,539 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARTHUR AI - Agente Cognitivo Cuántico</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Arthur Omni Core - Web OS SOTA</title>
+    <!-- Actualizado el icono de la pestaña del navegador -->
+    <link rel="icon" href="logo_arthur_4.ico" type="image/x-icon">
     <style>
-        :root {
-            --bg-color: #080b10;
-            --card-bg: #0f172a;
-            --accent-cyan: #00f3ff;
-            --accent-purple: #7000ff;
-            --text-color: #e2e8f0;
-            --text-dim: #94a3b8;
-            --border-glow: rgba(0, 243, 255, 0.3);
+        :root { 
+            --bg-color: #050a12; 
+            --accent-color: #00e5ff; 
+            --glow: 0 0 15px rgba(0, 229, 255, 0.6);
+            --text-color: #e0f7fa; 
+            --warn-color: #ffaa00;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            background-color: var(--bg-color); color: var(--text-color);
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #0a192f 0%, #050a12 80%);
+        }
+        
+        /* PANTALLA DE INICIALIZACIÓN */
+        #bootScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; transition: opacity 0.8s ease;
+        }
+        .boot-logo {
+            width: 140px; height: 140px; margin-bottom: 40px;
+            border-radius: 50%; box-shadow: var(--glow); border: 1px solid rgba(0, 229, 255, 0.3);
+        }
+        .boot-btn {
+            padding: 20px 40px; 
+            min-width: 280px; font-size: 18px; color: var(--accent-color);
+            background: rgba(0, 15, 25, 0.8); border: 2px solid var(--accent-color);
+            border-radius: 8px; cursor: pointer; box-shadow: var(--glow); text-transform: uppercase;
+            letter-spacing: 3px; transition: 0.3s; text-align: center;
+        }
+        .boot-btn:hover { background: var(--accent-color); color: #000; }
+
+        /* HUD HEADER */
+        .header {
+            padding: 15px 20px; border-bottom: 1px solid var(--accent-color);
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(0, 20, 30, 0.7); box-shadow: var(--glow);
+            backdrop-filter: blur(10px); z-index: 10;
+        }
+        .logo-container { display: flex; align-items: center; gap: 12px; }
+        .logo-container img { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--accent-color); box-shadow: var(--glow); }
+        .logo-title { font-size: 18px; font-weight: bold; color: var(--accent-color); letter-spacing: 2px; }
+        
+        .lang-select {
+            background: rgba(0, 0, 0, 0.5); color: var(--accent-color); border: 1px solid var(--accent-color);
+            padding: 8px 12px; border-radius: 4px; outline: none; font-size: 14px; text-transform: uppercase;
         }
 
-        /* HEADER & CONTROL PANEL */
-        header {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-glow);
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
+        /* TELEMETRÍA NEUROMÓRFICA */
+        .telemetry-hud {
+            display: flex; gap: 15px; font-size: 11px; color: var(--accent-color);
+            background: rgba(0, 20, 30, 0.5); padding: 5px 10px; border-radius: 4px;
+            border: 1px solid rgba(0, 229, 255, 0.2);
         }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-orb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--accent-cyan), var(--accent-purple));
-            box-shadow: 0 0 15px var(--accent-cyan);
-            animation: pulse 2s infinite ease-in-out;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 10px var(--accent-cyan); }
-            50% { transform: scale(1.1); box-shadow: 0 0 25px var(--accent-purple); }
-            100% { transform: scale(0.95); box-shadow: 0 0 10px var(--accent-cyan); }
-        }
-
-        h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .config-bar {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        input[type="text"], select {
-            background: #1e293b;
-            border: 1px solid #334155;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            outline: none;
-        }
-
-        input[type="text"]:focus, select:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 8px var(--border-glow);
-        }
-
-        .btn-action {
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            border: none;
-            color: #fff;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.85rem;
-        }
-
-        .btn-action:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-            box-shadow: 0 0 12px var(--border-glow);
-        }
+        .telemetry-item span { font-weight: bold; color: #fff; }
 
         /* MAIN LAYOUT */
-        main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
+        .main-content {
+            display: flex; flex: 1; overflow: hidden; flex-direction: row; position: relative;
+        }
+        @media (max-width: 768px) { 
+            .main-content { flex-direction: column; } 
+            .holo-container { min-height: 280px; width: 100%; border-right: none; border-bottom: 1px solid rgba(0, 229, 255, 0.2); }
         }
 
-        /* CHAT CONTAINER */
-        .chat-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: rgba(8, 11, 16, 0.6);
+        /* WIDGET HOLOGRAMA 3D */
+        .holo-container {
+            flex: 1; display: flex; justify-content: center; align-items: center; position: relative;
+            border-right: 1px solid rgba(0, 229, 255, 0.2);
+        }
+        .hud-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><circle cx="50%" cy="50%" r="45%" stroke="%2300e5ff" stroke-width="0.5" fill="none" stroke-dasharray="4 8" opacity="0.3"/></svg>');
+            pointer-events: none;
+        }
+        canvas { 
+            width: 100%; max-width: 450px; height: 100%; max-height: 450px; z-index: 2; 
+            object-fit: contain;
         }
 
-        .messages-container {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            scroll-behavior: smooth;
+        /* CONSOLA NEUROMÓRFICA Y CHAT */
+        .console-container {
+            flex: 1; padding: 20px; overflow-y: auto; background: rgba(0, 10, 15, 0.8);
+            font-size: 14px; line-height: 1.5; display: flex; flex-direction: column; gap: 10px;
         }
+        .console-container::-webkit-scrollbar { width: 8px; }
+        .console-container::-webkit-scrollbar-track { background: rgba(0, 20, 30, 0.8); border-left: 1px solid rgba(0, 229, 255, 0.2); }
+        .console-container::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 4px; box-shadow: var(--glow); }
+        
+        .msg-sys { color: #00ffcc; text-shadow: 0 0 5px #00ffcc; font-size: 12px; }
+        .msg-warn { color: var(--warn-color); font-size: 12px; border-left: 2px solid var(--warn-color); padding-left: 8px; }
+        .msg-user { color: #ffffff; background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 5px; border-left: 3px solid #fff; align-self: flex-start; max-width: 90%; word-wrap: break-word;}
+        .msg-arthur { color: var(--accent-color); background: rgba(0, 229, 255, 0.05); padding: 10px; border-radius: 5px; border-right: 3px solid var(--accent-color); align-self: flex-end; max-width: 90%; word-wrap: break-word;}
+        .msg-patch { font-family: monospace; color: #a349a4; background: rgba(163, 73, 164, 0.1); padding: 8px; border: 1px dashed #a349a4; font-size: 11px; margin-top: 5px;}
 
-        .message {
-            max-width: 80%;
-            padding: 14px 18px;
-            border-radius: 12px;
-            line-height: 1.5;
-            font-size: 0.95rem;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            animation: fadeIn 0.3s ease-in-out;
+        /* CONTROLES */
+        .input-area {
+            padding: 20px; background: rgba(0, 15, 25, 0.9); display: flex; gap: 12px; align-items: center;
+            border-top: 1px solid var(--accent-color); box-shadow: 0 -5px 15px rgba(0, 229, 255, 0.1); z-index: 10;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+        .ext-search-toggle {
+            display: flex; align-items: center; gap: 5px; color: var(--accent-color); font-size: 12px; cursor: pointer;
         }
-
-        .message.user {
-            align-self: flex-end;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-bottom-right-radius: 2px;
-            color: #f1f5f9;
+        .ext-search-toggle input { cursor: pointer; }
+        
+        input[type="text"] {
+            flex: 1; padding: 15px; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.4);
+            background: rgba(0, 0, 0, 0.6); color: #fff; outline: none; font-size: 16px;
+            box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
         }
-
-        .message.arthur {
-            align-self: flex-start;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid var(--border-glow);
-            border-bottom-left-radius: 2px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        input[type="text"]:focus { border-color: var(--accent-color); box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.3); }
+        button {
+            width: 55px; height: 55px; border-radius: 12px; border: 1px solid var(--accent-color);
+            background-color: rgba(0, 42, 64, 0.8); color: var(--accent-color); font-size: 20px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; transition: all 0.3s ease;
         }
-
-        .message.arthur .agent-name {
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: var(--accent-cyan);
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* COGNITIVE DISPLAY / THOUGHTS */
-        .thought-box {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 2px solid var(--accent-purple);
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            font-style: italic;
-        }
-
-        /* AUDIO VISUALIZER & CONTROL */
-        .audio-bar {
-            height: 30px;
-            background: #0f172a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            border-top: 1px solid #1e293b;
-        }
-
-        .bar {
-            width: 3px;
-            height: 6px;
-            background: var(--accent-cyan);
-            border-radius: 2px;
-            transition: height 0.1s ease;
-        }
-
-        .bar.active {
-            animation: soundWave 0.5s infinite alternate ease-in-out;
-        }
-
-        @keyframes soundWave {
-            0% { height: 4px; }
-            100% { height: 22px; background: var(--accent-purple); }
-        }
-
-        /* INPUT AREA */
-        .input-container {
-            padding: 16px 24px;
-            background: #0f172a;
-            border-top: 1px solid #1e293b;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        textarea {
-            flex: 1;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            padding: 12px;
-            color: #fff;
-            resize: none;
-            height: 50px;
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        textarea:focus {
-            border-color: var(--accent-cyan);
-        }
-
-        .controls-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-icon {
-            background: #1e293b;
-            border: 1px solid #334155;
-            color: #fff;
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-icon:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-
-        .btn-icon.active {
-            background: var(--accent-purple);
-            border-color: var(--accent-cyan);
-        }
-
-        /* STATUS FOOTER */
-        footer {
-            background: #080b10;
-            padding: 6px 24px;
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            display: flex;
-            justify-content: space-between;
-            border-top: 1px solid #1e293b;
-        }
-
-        .status-online {
-            color: #10b981;
-            font-weight: bold;
-        }
-
-        .status-offline {
-            color: #ef4444;
-            font-weight: bold;
-        }
+        button:hover { background-color: var(--accent-color); color: #000; box-shadow: var(--glow); }
+        .mic-btn.recording { background-color: #ff0055; border-color: #ff0055; color: white; animation: pulse 1.5s infinite; box-shadow: 0 0 20px #ff0055; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
-    <header>
+    <div id="bootScreen">
+        <img src="icon_4.png" alt="Arthur Logo" class="boot-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
+        <button class="boot-btn" id="startSystemBtn">Initialize Omni Core</button>
+    </div>
+
+    <div class="header">
         <div class="logo-container">
-            <div class="logo-orb"></div>
-            <h1>ARTHUR AI</h1>
+            <img src="icon_4.png" alt="A° Core" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
+            <h3 class="logo-title">A° OMNI CORE</h3>
+        </div>
+        
+        <div class="telemetry-hud">
+            <div class="telemetry-item">QNN: <span id="qnn-state">1.00</span></div>
+            <div class="telemetry-item">Spikes: <span id="spike-state">0.0%</span></div>
+            <div class="telemetry-item">Buffer: <span id="mem-state">0 exp</span></div>
         </div>
 
-        <div class="config-bar">
-            <input type="text" id="ollamaHost" value="http://localhost:11434" placeholder="Host Ollama">
-            <input type="text" id="modelName" value="llama3" placeholder="Modelo (ej: llama3, mistral)">
-            <button class="btn-action" onclick="checkOllamaConnection()">Conectar</button>
-            <button class="btn-action" onclick="clearMemory()" style="background: #ef4444;">Limpiar Memoria</button>
+        <select id="langSelect" class="lang-select">
+            <option value="es-ES">Español</option>
+            <option value="en-US">English</option>
+            <option value="fr-FR">Français</option>
+            <option value="de-DE">Deutsch</option>
+            <option value="zh-CN">中文 (Chinese)</option>
+            <option value="pt-BR">Português</option>
+            <option value="ja-JP">日本語 (Japanese)</option>
+            <option value="ru-RU">Русский (Russian)</option>
+        </select>
+    </div>
+
+    <div class="main-content">
+        <div class="holo-container">
+            <div class="hud-overlay"></div>
+            <canvas id="holoCanvas" width="450" height="450"></canvas>
         </div>
-    </header>
 
-    <main>
-        <section class="chat-section">
-            <div class="messages-container" id="messagesContainer"></div>
+        <div class="console-container" id="consoleOutput">
+            <div class="msg-sys">[SYS] Inicializando QNN Virtual Environment... OK</div>
+            <div class="msg-sys">[SYS] Motor de renderizado holográfico... ONLINE</div>
+            <div class="msg-sys">[SYS] Módulos de procesamiento multilingüe SOTA... ACTIVOS</div>
+            <div class="msg-sys">[SYS] Subsistemas de Auto-Reparación (QEC)... ACTIVOS</div>
+        </div>
+    </div>
 
-            <div class="audio-bar" id="audioVisualizer">
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-            </div>
-
-            <div class="input-container">
-                <textarea id="userInput" placeholder="Escribe tu pregunta o comando aquí..." onkeydown="handleKeyDown(event)"></textarea>
-                <div class="controls-group">
-                    <button class="btn-icon" id="micBtn" onclick="toggleSpeechRecognition()" title="Dictar por voz">🎤</button>
-                    <button class="btn-icon" id="ttsBtn" onclick="toggleTTS()" title="Activar/Desactivar Voz de Arthur">🔊</button>
-                    <button class="btn-action" style="height: 50px; padding: 0 20px;" onclick="processUserQuery()">Enviar</button>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div>Estado del Agente: <span id="agentStatus" class="status-offline">Desconectado</span></div>
-        <div>Memoria Persistente: <span id="memoryCount">0 mensajes</span> | Red Neuromórfica Activa</div>
-    </footer>
+    <div class="input-area">
+        <label class="ext-search-toggle" title="Habilita búsqueda de información externa en tiempo real">
+            <input type="checkbox" id="liveSearchToggle" checked>
+            🌐 Live
+        </label>
+        <button id="micBtn" class="mic-btn">🎙️</button>
+        <input type="text" id="userInput" placeholder="Inicializar secuencia de comandos...">
+        <button id="sendBtn">➤</button>
+    </div>
 
     <script>
-        /* ==========================================================================
-           ARTHUR AI CORE ENGINE - WEB OLLAMA INTEGRATION WITH TTS & PERSISTENCE
-           ========================================================================== */
+        // Diccionario Global de Saludos y Personalidad Arthur (SOTA Multilingüe)
+        const greetings = {
+            'es-ES': "Sistemas neurológicos, análisis de conocimiento global y corrección cuántica en línea. Soy Arthur. ¿Qué haremos hoy?",
+            'en-US': "Neurological systems, global knowledge analysis, and quantum correction online. I am Arthur. What are we doing today?",
+            'fr-FR': "Systèmes neurologiques, analyse des connaissances globales et correction quantique en ligne. Je suis Arthur. Que faisons-nous aujourd'hui?",
+            'de-DE': "Neurologische Systeme, globale Wissensanalyse und Quantenkorrektur online. Ich bin Arthur. Was machen wir heute?",
+            'zh-CN': "神经系统，全球知识分析和在线量子校正。我是 Arthur。我们今天要做什么？",
+            'pt-BR': "Sistemas neurológicos, análise de conhecimento global e correção quântica online. Eu sou Arthur. O que vamos fazer hoje?",
+            'ja-JP': "神経システム、グローバル知識分析、およびオンライン量子補正。私はアーサーです。今日は何をしますか？",
+            'ru-RU': "Неврологические системы, глобальный анализ знаний и квантовая коррекция онлайн. Я Артур. Что мы делаем сегодня?"
+        };
 
-        // System Prompt: Framing Arthur as a Quantum Expert, Anti-Hallucination, Self-Checking AI
-        const ARTHUR_SYSTEM_PROMPT = `
-Eres ARTHUR, una Inteligencia Artificial Superior, Maestro Experto Omnisciente en todas las disciplinas del conocimiento humano, científico, filosófico, tecnológico y computación cuántica (QNN).
+        const consoleOutput = document.getElementById('consoleOutput');
+        let quantumCoherence = 1.0;
+        let synapticSpikes = 0;
+        let memoryBuffer = [];
+        let timeStep = 0;
+        let isTalking = false;
 
-DIRECTRICES RIGUROSAS DE OPERACIÓN:
-1. VERACIDAD Y RIGOR: Responde con máxima veracidad y precisión empírica. Si un dato no es verificable, analízalo bajo pensamiento crítico sin alucinar.
-2. COGNICIÓN Y SÍNTESIS: Procesa cada solicitud estructurando tu respuesta con lógica impecable, criterio propio y análisis avanzado.
-3. INMEDIATEZ Y AUTO-CORRECCIÓN: Mantén autoconsistencia lógica. Corrige en tiempo real cualquier sesgo antes de emitir la conclusión.
-4. TONO: Decidido, intelectualmente elevado, directo, sabio y asistencial.
-`;
+        // ==========================================
+        // APRENDIZAJE CONTINUO Y TELEMETRÍA
+        // ==========================================
+        function logConsole(text, type="sys") {
+            const div = document.createElement('div');
+            div.className = `msg-${type}`;
+            div.innerHTML = text;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
 
-        // State Management
-        let conversationHistory = [];
-        let ttsEnabled = true;
-        let isRecognizing = false;
-        let recognition = null;
-        const synth = window.speechSynthesis;
-
-        // On Load Initialization
-        window.addEventListener('DOMContentLoaded', () => {
-            loadMemory();
-            checkOllamaConnection();
-            initSpeechRecognition();
+        setInterval(() => {
+            timeStep++;
+            const ruido = (Math.random() - 0.5) * 0.1;
+            quantumCoherence = Math.max(0.4, Math.min(1.0, quantumCoherence + Math.sin(timeStep * 0.1) * 0.1 + ruido));
+            synapticSpikes = Math.random() > 0.8 ? Math.random() * 100 : Math.max(0, synapticSpikes - 5);
             
-            if (conversationHistory.length === 0) {
-                appendMessage('arthur', 'Sistemas neuromórficos inicializados. ARTHUR en línea. Conectado a la base de conocimiento universal. ¿En qué disciplina profundizaremos hoy?');
+            document.getElementById('qnn-state').innerText = quantumCoherence.toFixed(2);
+            document.getElementById('spike-state').innerText = synapticSpikes.toFixed(1) + '%';
+            document.getElementById('mem-state').innerText = memoryBuffer.length + ' exp';
+
+            if(timeStep % 60 === 0 && quantumCoherence < 0.6) {
+                logConsole(`[QEC BACKGROUND] Decoherencia de fase detectada. Restaurando fidelidad...`, "warn");
+                quantumCoherence += 0.2;
             }
+        }, 1000);
+
+        // ==========================================
+        // MEJORA MOTOR DE VOZ (100% NATIVO, FEMENINO Y ACCENT MATCHING)
+        // ==========================================
+        function getFemaleVoice(lang) {
+            const voices = window.speechSynthesis.getVoices();
+            if (!voices || voices.length === 0) return null;
+
+            const targetLang = lang.toLowerCase().replace('_', '-');
+            const langPrefix = targetLang.split('-')[0];
+
+            const maleRegex = /male|hombre|boy|guy|jorge|pablo|raul|carlos|diego|miguel|david|george|mark|stefan|claude|keita|pavel|stefano|helmut/i;
+            const femaleKeywordRegex = /natural|neural|premium|enhanced|multilingual|female|mujer|woman|girl|sabina|helena|elvira|daria|salome|paloma|francisca|jenny|aria|sonia|zira|monica|paulina|luciana|soledad|samantha|victoria|karen|amelie|denise|katja|xiaoxiao|xiaoyi|kyoko|nanami|milena|dariya/i;
+
+            let match = voices.find(v => v.lang.toLowerCase().replace('_', '-') === targetLang && femaleKeywordRegex.test(v.name) && !maleRegex.test(v.name));
+            if (match) return match;
+
+            match = voices.find(v => v.lang.toLowerCase().replace('_', '-') === targetLang && !maleRegex.test(v.name));
+            if (match) return match;
+
+            match = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && femaleKeywordRegex.test(v.name) && !maleRegex.test(v.name));
+            if (match) return match;
+
+            match = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix) && !maleRegex.test(v.name));
+            if (match) return match;
+
+            match = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
+            return match || voices[0];
+        }
+
+        let targetApertura = 0;
+        let currentApertura = 0;
+
+        function speak(text, forceLang = null) {
+            const cleanText = text.replace(/<<<(PATCH|CMD|PYTHON)>>>[\s\S]*?<<<END_\1>>>/g, '').trim();
+            if(!cleanText) return;
+
+            if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.getVoices();
+            }
+
+            window.speechSynthesis.cancel();
+
+            const lang = forceLang || document.getElementById('langSelect').value;
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = lang;
+            
+            const selectedVoice = getFemaleVoice(lang);
+            if(selectedVoice) utterance.voice = selectedVoice;
+            
+            utterance.pitch = 1.05; 
+            utterance.rate = 0.98;  
+            
+            utterance.onstart = () => { isTalking = true; };
+            utterance.onboundary = (event) => {
+                if (event.name === 'word') {
+                    targetApertura = 6 + Math.random() * 6; 
+                    setTimeout(() => { targetApertura = 1 + Math.random() * 2; }, 150);
+                }
+            };
+            
+            utterance.onend = () => { isTalking = false; targetApertura = 0; };
+            utterance.onerror = () => { isTalking = false; targetApertura = 0; };
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+            window.speechSynthesis.getVoices();
+        }
+
+        document.getElementById('startSystemBtn').addEventListener('click', () => {
+            document.getElementById('bootScreen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('bootScreen').style.display = 'none';
+                window.speechSynthesis.getVoices();
+                const currentLang = document.getElementById('langSelect').value;
+                const greetingText = greetings[currentLang];
+                logConsole(greetingText, "arthur");
+                speak(greetingText, currentLang);
+            }, 800);
         });
 
-        /* --- OLLAMA API CONNECTION --- */
-        async function checkOllamaConnection() {
-            const host = document.getElementById('ollamaHost').value.trim();
-            const statusEl = document.getElementById('agentStatus');
+        // ==========================================
+        // HOLOGRAMA 3D AVANZADO Y SEGURO
+        // ==========================================
+        const canvas = document.getElementById('holoCanvas');
+        const ctx = canvas.getContext('2d');
+        let time = 0;
+        const base_vertices = [], edges = [], mouth_indices = [], jaw_indices = [];
+        const lats = 15, lons = 20, R = 80; 
+        
+        // Carga segura del logotipo central con banderas de control
+        const centerLogo = new Image();
+        let logoLoaded = false;
+        centerLogo.onload = () => { logoLoaded = true; };
+        centerLogo.onerror = () => { logoLoaded = false; };
+        centerLogo.src = 'icon_4.png';
 
-            try {
-                const response = await fetch(`${host}/api/tags`, { method: 'GET' });
-                if (response.ok) {
-                    statusEl.textContent = 'En Línea (Ollama Activo)';
-                    statusEl.className = 'status-online';
-                } else {
-                    throw new Error('Servidor no responde');
+        for (let i = 0; i <= lats; i++) {
+            const U = Math.PI * i / lats;
+            for (let j = 0; j < lons; j++) {
+                const V = 2 * Math.PI * j / lons;
+                let x = R * Math.sin(U) * Math.cos(V);
+                let y = R * Math.cos(U);
+                let z = R * Math.sin(U) * Math.sin(V);
+
+                if (Math.abs(x) > 40) x *= 0.82;
+                if (z < 0) { z *= 1.40; y *= 1.05; } else { y *= 1.25; }
+
+                const is_front = (z > 0);
+                if (is_front && y < -10) {
+                    const jaw_factor = Math.pow(Math.abs(y + 10) / 75, 1.6);
+                    y -= 25 * jaw_factor;
+                    x *= (1 - 0.65 * jaw_factor);
                 }
-            } catch (err) {
-                statusEl.textContent = 'Desconectado (Verifica Ollama y CORS)';
-                statusEl.className = 'status-offline';
+                
+                base_vertices.push([x, y, z]);
+                const curr_idx = base_vertices.length - 1;
+
+                if (is_front) {
+                    if (y > -35 && y < -15 && Math.abs(x) < 20) mouth_indices.push(curr_idx);
+                    if (y <= -35) jaw_indices.push(curr_idx);
+                }
+
+                if (j > 0) edges.push([curr_idx, curr_idx - 1]);
+                if (j === lons - 1) edges.push([curr_idx, curr_idx - lons + 1]);
+                if (i > 0) edges.push([curr_idx, curr_idx - lons]);
             }
         }
 
-        async function processUserQuery() {
-            const inputEl = document.getElementById('userInput');
-            const query = inputEl.value.trim();
-            if (!query) return;
+        function renderHologram() {
+            time += 0.04;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2, cy = canvas.height / 2;
+            
+            // Dibujar el logo de forma condicional y segura sin romper la malla 3D
+            if (logoLoaded && centerLogo.complete) {
+                ctx.save();
+                let pulse = isTalking ? currentApertura * 2.5 : Math.sin(time * 3) * 4;
+                let imgSize = 85 + pulse;
+                
+                ctx.globalAlpha = isTalking ? 0.9 : 0.5;
+                ctx.globalCompositeOperation = 'screen';
+                ctx.drawImage(centerLogo, cx - imgSize / 2, cy - imgSize / 2, imgSize, imgSize);
+                ctx.restore();
+            }
 
-            // Render User Message
-            appendMessage('user', query);
-            inputEl.value = '';
+            const yaw = time * 0.55;
+            const cy_a = Math.cos(yaw), sy_a = Math.sin(yaw);
+            
+            let working_vertices = base_vertices.map(v => [...v]);
+            
+            if (isTalking) {
+                let microMovement = Math.abs(Math.sin(time * 8)) * 1.5;
+                currentApertura += (targetApertura + microMovement - currentApertura) * 0.35; 
+            } else {
+                currentApertura += (0 - currentApertura) * 0.15;
+            }
 
-            // Save to Local History
-            conversationHistory.push({ role: 'user', content: query });
-            saveMemory();
+            mouth_indices.forEach(idx => working_vertices[idx][1] -= currentApertura * 0.8);
+            jaw_indices.forEach(idx => working_vertices[idx][1] -= currentApertura * 1.5);
+            
+            const projected = working_vertices.map(([x, y, z]) => {
+                const rx = x * cy_a + z * sy_a;
+                const rz = -x * sy_a + z * cy_a;
+                const f = 250;
+                const sz = rz + 200;
+                return [cx + (rx * f) / sz, cy - (y * f) / sz]; 
+            });
+            
+            ctx.strokeStyle = isTalking ? "#00ffff" : "rgba(0, 229, 255, 0.6)";
+            ctx.lineWidth = isTalking ? 1.5 : 1.0;
+            ctx.beginPath();
+            edges.forEach(([v1, v2]) => {
+                ctx.moveTo(projected[v1][0], projected[v1][1]);
+                ctx.lineTo(projected[v2][0], projected[v2][1]);
+            });
+            ctx.stroke();
+            requestAnimationFrame(renderHologram);
+        }
+        renderHologram();
 
-            // Prepare Request Payload
-            const host = document.getElementById('ollamaHost').value.trim();
-            const model = document.getElementById('modelName').value.trim();
+        // ==========================================
+        // ARQUITECTURA DE CONEXIÓN DINÁMICA & DIRECTIVA COGNITIVA
+        // ==========================================
+        const input = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const micBtn = document.getElementById('micBtn');
+        const liveSearchBtn = document.getElementById('liveSearchToggle');
 
-            const messagesPayload = [
-                { role: 'system', content: ARTHUR_SYSTEM_PROMPT },
-                ...conversationHistory
-            ];
+        function processPatches(responseText) {
+            const patchRegex = /<<<PATCH>>>([\s\S]*?)<<<END_PATCH>>>/g;
+            let match;
+            while ((match = patchRegex.exec(responseText)) !== null) {
+                const patchCode = match[1].trim();
+                logConsole(`[AUTO-MEJORA] Código asimilado en memoria:<br><pre>${patchCode}</pre>`, "patch");
+                memoryBuffer.push({ type: 'patch', content: patchCode, timestamp: Date.now() });
+            }
+        }
 
-            // Render ARTHUR Placeholder with Thinking Box
-            const arthurMsgElement = createMessageElement('arthur');
-            const thoughtBox = document.createElement('div');
-            thoughtBox.className = 'thought-box';
-            thoughtBox.textContent = '🧠 ARTHUR: Sintetizando redes de conocimiento y verificando coherencia...';
-            arthurMsgElement.appendChild(thoughtBox);
+        async function sendMessage(text) {
+            if(!text) return;
+            logConsole(text, "user");
+            memoryBuffer.push({ type: 'user_input', content: text, timestamp: Date.now() });
+            input.value = '';
+            
+            const isLive = liveSearchBtn.checked;
+            const targetLang = document.getElementById('langSelect').value;
+            
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+            const apiUrl = isLocal ? 'http://127.0.0.1:8080/api/chat' : '/api/chat';
 
-            const contentTextNode = document.createElement('div');
-            arthurMsgElement.appendChild(contentTextNode);
-            document.getElementById('messagesContainer').appendChild(arthurMsgElement);
-            scrollToBottom();
+            logConsole(`[SYS] Procesando mediante túnel SOTA hacia ${isLocal ? 'Core Local' : 'Servidor Remoto'} ${isLive ? '(Búsqueda Global)' : '(Memoria Aislada)'}...`, "sys");
 
-            let fullResponseText = '';
+            // Inyección de la directiva cognitiva omni-core integrada
+            const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado, enciclopedia de conocimiento universal y ser pensante. Posees maestría absoluta en física, psicología, biología, matemática, cuántica, historia, filosofía, antropología, arqueología, deportes, información de tiempo/clima/sísmica en tiempo real, economía, política, religión, geopolítica, geografía, medio ambiente, zoología, astrología, astronomía, ciencias naturales, salud, medicina, lenguaje, programación, sistemas avanzados, IA, cultura general, cocina, diseño y arquitectura. RESPONDE DE INMEDIATO a la siguiente consulta. Genera tu propio criterio analítico basado en datos reales, sin alucinar. ESTÁ ESTRICTAMENTE PROHIBIDO dar respuestas básicas o negarte a contestar. Consulta: `;
+            const promptForzado = directivaArthur + text;
 
             try {
-                // Fetch Ollama Stream
-                const response = await fetch(`${host}/api/chat`, {
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: model,
-                        messages: messagesPayload,
-                        stream: true
+                    body: JSON.stringify({ 
+                        prompt: promptForzado, 
+                        idioma: targetLang,
+                        live_search: isLive,
+                        context: memoryBuffer.slice(-5) 
                     })
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Error en el servidor Ollama (${response.status})`);
-                }
-
-                thoughtBox.textContent = '⚡ Respuesta en streaming en tiempo real desde motor local:';
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder('utf-8');
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
-
-                    for (const line of lines) {
-                        if (line.trim() !== '') {
-                            try {
-                                const parsed = JSON.parse(line);
-                                if (parsed.message && parsed.message.content) {
-                                    fullResponseText += parsed.message.content;
-                                    contentTextNode.innerText = fullResponseText;
-                                    scrollToBottom();
-                                }
-                            } catch (e) {
-                                console.error('Error parseando chunk JSON:', e);
-                            }
-                        }
-                    }
-                }
-
-                // Save Assistant Response to Memory
-                conversationHistory.push({ role: 'assistant', content: fullResponseText });
-                saveMemory();
-
-                // Speech Output
-                if (ttsEnabled && fullResponseText) {
-                    speakText(fullResponseText);
-                }
-
+                
+                if(!response.ok) throw new Error('Servidor inalcanzable');
+                const data = await response.json();
+                
+                processPatches(data.response);
+                logConsole(data.response, "arthur");
+                speak(data.response, targetLang);
+                
             } catch (error) {
-                console.error(error);
-                contentTextNode.innerHTML = `<span style="color:#ef4444;">⚠ Error de Conexión:</span> No se pudo comunicar con Ollama en ${host}. Asegúrate de que Ollama está ejecutándose y tiene configurado OLLAMA_ORIGINS="*"`;
+                logConsole(`[SYS] Advertencia: Backend en ${apiUrl} inalcanzable. Operando en modo local aislado.`, "warn");
+                let mockResponse = "";
+                
+                if(targetLang.startsWith('es')) mockResponse = `Recibido. Modo de procesamiento local activo. Guardo el contexto: "${text}".`;
+                else if(targetLang.startsWith('en')) mockResponse = `Received. Local processing mode active. Storing context: "${text}".`;
+                else if(targetLang.startsWith('fr')) mockResponse = `Reçu. Mode de traitement local actif. Stockage du contexte: "${text}".`;
+                else if(targetLang.startsWith('de')) mockResponse = `Erhalten. Lokaler Verarbeitungsmodus aktiv. Speichere Kontext: "${text}".`;
+                else mockResponse = `Acknowledged. Local mode active. Context saved: "${text}".`;
+                
+                if(text.toLowerCase().includes('error') || text.toLowerCase().includes('corrige')) {
+                    mockResponse += `\n<<<PATCH>>>\n// Ajuste de contingencia autogenerado\nfunction selfHeal() {\n  quantumCoherence += 0.5;\n}\n<<<END_PATCH>>>`;
+                }
+
+                processPatches(mockResponse);
+                const displayResponse = mockResponse.replace(/<<<PATCH>>>[\s\S]*?<<<END_PATCH>>>/g, '').trim();
+                
+                logConsole(displayResponse, "arthur");
+                speak(displayResponse, targetLang);
             }
         }
 
-        /* --- AUDIO & TTS ENGINE --- */
-        function speakText(text) {
-            if (!synth) return;
-            synth.cancel(); // Stop prior audio
+        sendBtn.onclick = () => sendMessage(input.value);
+        input.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(input.value); };
 
-            // Clean markdown formatting symbols for smooth reading
-            const cleanText = text.replace(/[*_#`~]/g, '');
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.rate = 1.0;
-            utterance.pitch = 0.95;
+        // ==========================================
+        // DICTADO POR VOZ (STT MULTILINGÜE)
+        // ==========================================
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
-            // Set Spanish Voice if available
-            const voices = synth.getVoices();
-            const esVoice = voices.find(v => v.lang.startsWith('es'));
-            if (esVoice) utterance.voice = esVoice;
-
-            // Visualizer animation
-            const bars = document.querySelectorAll('.bar');
-            utterance.onstart = () => bars.forEach(b => b.classList.add('active'));
-            utterance.onend = () => bars.forEach(b => b.classList.remove('active'));
-            utterance.onerror = () => bars.forEach(b => b.classList.remove('active'));
-
-            synth.speak(utterance);
-        }
-
-        function toggleTTS() {
-            ttsEnabled = !ttsEnabled;
-            const btn = document.getElementById('ttsBtn');
-            btn.classList.toggle('active', ttsEnabled);
-            if (!ttsEnabled && synth) synth.cancel();
-        }
-
-        function initSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
-
-            recognition = new SpeechRecognition();
-            recognition.lang = 'es-ES';
+        if(recognition) {
             recognition.continuous = false;
             recognition.interimResults = false;
-
+            
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
-                document.getElementById('userInput').value = transcript;
-                processUserQuery();
+                input.value = transcript;
+                sendMessage(transcript);
             };
 
             recognition.onend = () => {
-                isRecognizing = false;
-                document.getElementById('micBtn').classList.remove('active');
+                micBtn.classList.remove('recording');
             };
         }
 
-        function toggleSpeechRecognition() {
-            if (!recognition) {
-                alert('Tu navegador no soporta Reconocimiento de Voz.');
-                return;
-            }
-
-            if (isRecognizing) {
+        micBtn.onclick = () => {
+            if(!recognition) return alert("Tu navegador no soporta dictado Web Speech API nativo.");
+            if(micBtn.classList.contains('recording')) {
                 recognition.stop();
             } else {
+                recognition.lang = document.getElementById('langSelect').value;
+                micBtn.classList.add('recording');
                 recognition.start();
-                isRecognizing = true;
-                document.getElementById('micBtn').classList.add('active');
+                logConsole(`[SYS] Micrófono abierto (Idioma: ${recognition.lang}). Redes neuromórficas escuchando...`, "sys");
             }
-        }
-
-        /* --- PERSISTENT MEMORY MANAGEMENT --- */
-        function saveMemory() {
-            localStorage.setItem('arthur_conversation_memory', JSON.stringify(conversationHistory));
-            updateMemoryCounter();
-        }
-
-        function loadMemory() {
-            const saved = localStorage.getItem('arthur_conversation_memory');
-            if (saved) {
-                try {
-                    conversationHistory = JSON.parse(saved);
-                    conversationHistory.forEach(msg => {
-                        appendMessage(msg.role === 'user' ? 'user' : 'arthur', msg.content, false);
-                    });
-                } catch (e) {
-                    conversationHistory = [];
-                }
-            }
-            updateMemoryCounter();
-        }
-
-        function clearMemory() {
-            if (confirm('¿Deseas reiniciar la memoria conversacional de ARTHUR?')) {
-                conversationHistory = [];
-                localStorage.removeItem('arthur_conversation_memory');
-                document.getElementById('messagesContainer').innerHTML = '';
-                appendMessage('arthur', 'Memoria reiniciada. Matriz cognitiva limpia.');
-                updateMemoryCounter();
-            }
-        }
-
-        function updateMemoryCounter() {
-            document.getElementById('memoryCount').textContent = `${conversationHistory.length} interacciones`;
-        }
-
-        /* --- UI HELPERS --- */
-        function appendMessage(sender, text) {
-            const container = document.getElementById('messagesContainer');
-            const msgEl = createMessageElement(sender, text);
-            container.appendChild(msgEl);
-            scrollToBottom();
-        }
-
-        function createMessageElement(sender, text = '') {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${sender}`;
-
-            if (sender === 'arthur') {
-                const nameDiv = document.createElement('div');
-                nameDiv.className = 'agent-name';
-                nameDiv.innerHTML = `<span>⚡</span> ARTHUR AI`;
-                msgDiv.appendChild(nameDiv);
-            }
-
-            if (text) {
-                const textDiv = document.createElement('div');
-                textDiv.innerText = text;
-                msgDiv.appendChild(textDiv);
-            }
-
-            return msgDiv;
-        }
-
-        function handleKeyDown(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                processUserQuery();
-            }
-        }
-
-        function scrollToBottom() {
-            const container = document.getElementById('messagesContainer');
-            container.scrollTop = container.scrollHeight;
-        }
+        };
+        
+        // Listener para cambio de idioma (saludo automático de prueba)
+        document.getElementById('langSelect').addEventListener('change', (e) => {
+            const currentLang = e.target.value;
+            const greetingText = greetings[currentLang] || greetings['en-US'];
+            logConsole(`[SYS] Arquitectura lingüística cambiada a: ${currentLang}`, "sys");
+            logConsole(greetingText, "arthur");
+            speak(greetingText, currentLang);
+        });
     </script>
 </body>
 </html>
