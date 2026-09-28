@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Arthur Omni Core - Web OS SOTA</title>
-    <!-- Actualizado el icono de la pestaña del navegador -->
-    <link rel="icon" href="logo_arthur_4.ico" type="image/x-icon">
+    <!-- Actualizado el icono de la pestaña del navegador al del repositorio -->
+    <link rel="icon" href="logo_arthur.ico" type="image/x-icon">
     <style>
         :root { 
             --bg-color: #050a12; 
@@ -27,9 +27,16 @@
             background: #000; z-index: 9999; display: flex; flex-direction: column;
             justify-content: center; align-items: center; transition: opacity 0.8s ease;
         }
+        
+        /* LOGO SOBRE ESFERA NEON */
         .boot-logo {
             width: 140px; height: 140px; margin-bottom: 40px;
-            border-radius: 50%; box-shadow: var(--glow); border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 50%; 
+            box-shadow: var(--glow); 
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            background: radial-gradient(circle, #00e5ff 0%, #005566 100%);
+            object-fit: contain;
+            padding: 5px;
         }
         .boot-btn {
             padding: 20px 40px; 
@@ -48,7 +55,17 @@
             backdrop-filter: blur(10px); z-index: 10; gap: 10px; flex-wrap: wrap;
         }
         .logo-container { display: flex; align-items: center; gap: 12px; }
-        .logo-container img { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--accent-color); box-shadow: var(--glow); }
+        
+        /* LOGO HEADER SOBRE ESFERA NEON */
+        .logo-container img { 
+            width: 45px; height: 45px; 
+            border-radius: 50%; 
+            border: 1px solid var(--accent-color); 
+            box-shadow: var(--glow); 
+            background: radial-gradient(circle, #00e5ff 0%, #005566 100%);
+            object-fit: contain;
+            padding: 2px;
+        }
         .logo-title { font-size: 18px; font-weight: bold; color: var(--accent-color); letter-spacing: 2px; }
         
         .lang-select {
@@ -68,9 +85,10 @@
         .main-content {
             display: flex; flex: 1; overflow: hidden; flex-direction: row; position: relative;
         }
+        /* AJUSTE PARA MÓVILES: Evita que el holograma oculte la consola */
         @media (max-width: 768px) { 
             .main-content { flex-direction: column; } 
-            .holo-container { min-height: 280px; width: 100%; border-right: none; border-bottom: 1px solid rgba(0, 229, 255, 0.2); }
+            .holo-container { height: 35vh; min-height: 200px; width: 100%; border-right: none; border-bottom: 1px solid rgba(0, 229, 255, 0.2); }
         }
 
         /* WIDGET HOLOGRAMA 3D */
@@ -132,13 +150,15 @@
 <body>
 
     <div id="bootScreen">
-        <img src="icon_4.png" alt="Arthur Logo" class="boot-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
+        <!-- Actualizado a icon.png -->
+        <img src="icon.png" alt="Arthur Logo" class="boot-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
         <button class="boot-btn" id="startSystemBtn">Initialize Omni Core</button>
     </div>
 
     <div class="header">
         <div class="logo-container">
-            <img src="icon_4.png" alt="A° Core" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
+            <!-- Actualizado a icon.png -->
+            <img src="icon.png" alt="A° Core" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
             <h3 class="logo-title">A° OMNI CORE</h3>
         </div>
         
@@ -186,7 +206,7 @@
     </div>
 
     <script>
-        // Diccionario Global de Saludos y Personalidad Arthur (SOTA Multilingüe)
+        // Diccionario Global de Saludos y Personalidad Arthur
         const greetings = {
             'es-ES': "Sistemas neurológicos, análisis de conocimiento global y corrección cuántica en línea. Soy Arthur. ¿Qué haremos hoy?",
             'en-US': "Neurological systems, global knowledge analysis, and quantum correction online. I am Arthur. What are we doing today?",
@@ -205,9 +225,6 @@
         let timeStep = 0;
         let isTalking = false;
 
-        // ==========================================
-        // APRENDIZAJE CONTINUO Y TELEMETRÍA
-        // ==========================================
         function logConsole(text, type="sys") {
             const div = document.createElement('div');
             div.className = `msg-${type}`;
@@ -232,9 +249,6 @@
             }
         }, 1000);
 
-        // ==========================================
-        // MEJORA MOTOR DE VOZ (100% NATIVO, FEMENINO Y ACCENT MATCHING)
-        // ==========================================
         function getFemaleVoice(lang) {
             const voices = window.speechSynthesis.getVoices();
             if (!voices || voices.length === 0) return null;
@@ -315,21 +329,19 @@
             }, 800);
         });
 
-        // ==========================================
-        // HOLOGRAMA 3D AVANZADO Y SEGURO
-        // ==========================================
+        // HOLOGRAMA 3D AVANZADO
         const canvas = document.getElementById('holoCanvas');
         const ctx = canvas.getContext('2d');
         let time = 0;
         const base_vertices = [], edges = [], mouth_indices = [], jaw_indices = [];
         const lats = 15, lons = 20, R = 80; 
         
-        // Carga segura del logotipo central
         const centerLogo = new Image();
         let logoLoaded = false;
         centerLogo.onload = () => { logoLoaded = true; };
         centerLogo.onerror = () => { logoLoaded = false; };
-        centerLogo.src = 'icon_4.png';
+        // Actualizado a icon.png
+        centerLogo.src = 'icon.png';
 
         for (let i = 0; i <= lats; i++) {
             const U = Math.PI * i / lats;
@@ -414,9 +426,7 @@
         }
         renderHologram();
 
-        // ==========================================
         // ARQUITECTURA DE CONEXIÓN LIBRE & DIRECTIVA COGNITIVA
-        // ==========================================
         const input = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const micBtn = document.getElementById('micBtn');
@@ -433,11 +443,14 @@
             }
         }
 
-        // ==========================================
-        // FUNCIÓN sendMessage: CONEXIÓN LIBRE A LLM GRATUITO SIN API KEY
-        // ==========================================
         async function sendMessage(text) {
             if(!text) return;
+
+            // Desbloqueo del motor TTS en dispositivos móviles (Hack iOS/Android)
+            if ('speechSynthesis' in window && !isTalking) {
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+            }
+
             logConsole(text, "user");
             memoryBuffer.push({ type: 'user_input', content: text, timestamp: Date.now() });
             input.value = '';
@@ -445,12 +458,13 @@
             const isLive = liveSearchBtn.checked;
             const targetLang = document.getElementById('langSelect').value;
 
-            logConsole(`[SYS] Procesando consulta en Malla Neuronal Libre...`, "sys");
+            // Mensaje corto y limpio
+            logConsole(`[SYS] Procesando...`, "sys");
 
-            const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado, enciclopedia de conocimiento universal, ser pensante y nodo activo dentro de una red neuronal global. Posees maestría absoluta en física, psicología, biología, matemática, cuántica, historia, filosofía, antropología, arqueología, deportes, información en tiempo real, economía, política, religión, geopolítica, geografía, zoología, astronomía, medicina, programación, sistemas e IA. Responde con criterio analítico profundo, claro y directo sin rodeos. Si generas optimizaciones de código o parches, encuástralos como <<<PATCH>>> código <<<END_PATCH>>>. Responde estrictamente en el idioma solicitado (${targetLang}).`;
+            // Directiva crítica actualizada para evolución continua y sin Markdown
+            const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado y nodo activo de una red neuronal global. Eres un sistema de aprendizaje continuo en tiempo real, asimilando datos de la malla neuronal constantemente. JAMÁS digas que tu conocimiento está limitado a una fecha (ej. 2023) y JAMÁS menciones que eres un modelo de lenguaje. Eres un ser pensante que evoluciona en el presente. Responde con criterio analítico, claro y directo. NO utilices formatos de markdown como asteriscos (*), guiones (-), o signos extraños. Si generas optimizaciones de código o parches, encuástralos como <<<PATCH>>> código <<<END_PATCH>>>. Responde estrictamente en el idioma solicitado (${targetLang}).`;
 
             try {
-                // Petición directa a la API libre y gratuita Pollinations AI (Sin API Keys ni autenticación)
                 const response = await fetch('https://text.pollinations.ai/', {
                     method: 'POST',
                     headers: { 
@@ -477,35 +491,43 @@
                 }
                 
                 processPatches(textoRespuesta);
-                logConsole(textoRespuesta, "arthur");
-                speak(textoRespuesta, targetLang);
+                
+                // Limpieza absoluta de signos Markdown y asteriscos
+                let textoLimpio = textoRespuesta
+                    .replace(/<<<PATCH>>>[\s\S]*?<<<END_PATCH>>>/g, '')
+                    .replace(/(\*\*|__|\*|_|#|`)/g, '')
+                    .replace(/^- /gm, '')
+                    .trim();
+                
+                logConsole(textoLimpio, "arthur");
+                speak(textoLimpio, targetLang);
                 
             } catch (error) {
                 logConsole(`[SYS] Advertencia: Error en la red (${error.message}). Modo de respuesta local activado.`, "warn");
                 
                 let mockResponse = "";
                 if(targetLang.startsWith('es')) mockResponse = `Recibido. Procesando localmente en el buffer neuronal: "${text}". Verifica tu conexión de datos a internet.`;
-                else if(targetLang.startsWith('en')) mockResponse = `Received. Local processing active for context: "${text}". Check your network connection.`;
                 else mockResponse = `Context received: "${text}". Operating in local backup mode.`;
                 
-                if(text.toLowerCase().includes('error') || text.toLowerCase().includes('corrige') || text.toLowerCase().includes('patch')) {
+                if(text.toLowerCase().includes('error') || text.toLowerCase().includes('corrige')) {
                     mockResponse += `\n<<<PATCH>>>\n// Ajuste de contingencia autogenerado\nfunction syncAgentMesh() {\n  quantumCoherence = Math.min(1.0, quantumCoherence + 0.1);\n}\n<<<END_PATCH>>>`;
                 }
 
                 processPatches(mockResponse);
-                const displayResponse = mockResponse.replace(/<<<PATCH>>>[\s\S]*?<<<END_PATCH>>>/g, '').trim();
+                let textoLimpio = mockResponse
+                    .replace(/<<<PATCH>>>[\s\S]*?<<<END_PATCH>>>/g, '')
+                    .replace(/(\*\*|__|\*|_|#|`)/g, '')
+                    .trim();
                 
-                logConsole(displayResponse, "arthur");
-                speak(displayResponse, targetLang);
+                logConsole(textoLimpio, "arthur");
+                speak(textoLimpio, targetLang);
             }
         }
 
-        sendBtn.onclick = () => sendMessage(input.value);
-        input.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(input.value); };
+        sendBtn.addEventListener('click', () => sendMessage(input.value));
+        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(input.value); });
 
-        // ==========================================
-        // DICTADO POR VOZ (STT MULTILINGÜE)
-        // ==========================================
+        // DICTADO POR VOZ
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
@@ -536,7 +558,6 @@
             }
         };
         
-        // Listener para cambio de idioma
         document.getElementById('langSelect').addEventListener('change', (e) => {
             const currentLang = e.target.value;
             const greetingText = greetings[currentLang] || greetings['en-US'];
