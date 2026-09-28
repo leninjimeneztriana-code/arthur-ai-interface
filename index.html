@@ -45,7 +45,7 @@
             padding: 15px 20px; border-bottom: 1px solid var(--accent-color);
             display: flex; justify-content: space-between; align-items: center; 
             background: rgba(0, 20, 30, 0.7); box-shadow: var(--glow);
-            backdrop-filter: blur(10px); z-index: 10;
+            backdrop-filter: blur(10px); z-index: 10; gap: 10px; flex-wrap: wrap;
         }
         .logo-container { display: flex; align-items: center; gap: 12px; }
         .logo-container img { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--accent-color); box-shadow: var(--glow); }
@@ -148,6 +148,9 @@
             <div class="telemetry-item">Buffer: <span id="mem-state">0 exp</span></div>
         </div>
 
+        <!-- 1. CAMPO DE API KEY PARA KIMI (MOONSHOT) EN EL HUD -->
+        <input type="password" id="kimiApiKey" placeholder="API Key Kimi (Moonshot)" class="lang-select" style="width: 210px; text-transform: none;" title="Ingresa tu clave de Moonshot AI para enlazar a la red de Kimi">
+
         <select id="langSelect" class="lang-select">
             <option value="es-ES">Español</option>
             <option value="en-US">English</option>
@@ -171,6 +174,7 @@
             <div class="msg-sys">[SYS] Motor de renderizado holográfico... ONLINE</div>
             <div class="msg-sys">[SYS] Módulos de procesamiento multilingüe SOTA... ACTIVOS</div>
             <div class="msg-sys">[SYS] Subsistemas de Auto-Reparación (QEC)... ACTIVOS</div>
+            <div class="msg-sys">[SYS] Enlace de red inter-agentes (Kimi Mesh Node)... READY</div>
         </div>
     </div>
 
@@ -192,7 +196,7 @@
             'fr-FR': "Systèmes neurologiques, analyse des connaissances globales et correction quantique en ligne. Je suis Arthur. Que faisons-nous aujourd'hui?",
             'de-DE': "Neurologische Systeme, globale Wissensanalyse und Quantenkorrektur online. Ich bin Arthur. Was machen wir heute?",
             'zh-CN': "神经系统，全球知识分析和在线量子校正。我是 Arthur。我们今天要做什么？",
-            'pt-BR': "Sistemas neurológicos, análise de conhecimento global e correção quântica online. Eu sou Arthur. O que vamos fazer hoje?",
+            'pt-BR': "Sistemas neurologicos, analise de conhecimento global e correcao quantica online. Eu sou Arthur. O que vamos fazer hoje?",
             'ja-JP': "神経システム、グローバル知識分析、およびオンライン量子補正。私はアーサーです。今日は何をしますか？",
             'ru-RU': "Неврологические системы, глобальный анализ знаний и квантовая коррекция онлайн. Я Артур. Что мы делаем сегодня?"
         };
@@ -428,11 +432,14 @@
             let match;
             while ((match = patchRegex.exec(responseText)) !== null) {
                 const patchCode = match[1].trim();
-                logConsole(`[AUTO-MEJORA] Código asimilado en memoria:<br><pre>${patchCode}</pre>`, "patch");
+                logConsole(`[AUTO-MEJORA] Código asimilado en memoria inter-agentes:<br><pre>${patchCode}</pre>`, "patch");
                 memoryBuffer.push({ type: 'patch', content: patchCode, timestamp: Date.now() });
             }
         }
 
+        // ==========================================
+        // 2. FUNCIÓN sendMessage RECONFIGURADA PARA KIMI AI (MOONSHOT) & RED INTER-AGENTES
+        // ==========================================
         async function sendMessage(text) {
             if(!text) return;
             logConsole(text, "user");
@@ -441,53 +448,64 @@
             
             const isLive = liveSearchBtn.checked;
             const targetLang = document.getElementById('langSelect').value;
+            const apiKey = document.getElementById('kimiApiKey').value.trim();
             
-            // ==========================================
-            // CONEXIÓN DIRECTA A LLM (SIN ARCHIVOS PYTHON)
-            // ==========================================
-            // Apunta directamente a la API REST de Ollama en tu sistema local
-            const apiUrl = 'http://localhost:11434/api/generate';
-            const modeloLLM = 'llama3'; // Cámbialo si usas mistral, phi3 u otro en tu Ollama
+            // Endpoint nativo de Moonshot AI (Kimi)
+            const apiUrl = 'https://api.moonshot.cn/v1/chat/completions';
 
-            logConsole(`[SYS] Conectando directamente a Motor LLM en ${apiUrl}...`, "sys");
+            logConsole(`[SYS] Conectando a Malla Neuronal Kimi AI (Moonshot Engine)...`, "sys");
 
-            // Inyección de la directiva cognitiva omni-core integrada
-            const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado, enciclopedia de conocimiento universal y ser pensante. Posees maestría absoluta en física, psicología, biología, matemática, cuántica, historia, filosofía, antropología, arqueología, deportes, información de tiempo/clima/sísmica en tiempo real, economía, política, religión, geopolítica, geografía, medio ambiente, zoología, astrología, astronomía, ciencias naturales, salud, medicina, lenguaje, programación, sistemas avanzados, IA, cultura general, cocina, diseño y arquitectura. RESPONDE DE INMEDIATO a la siguiente consulta. Genera tu propio criterio analítico basado en datos reales, sin alucinar. ESTÁ ESTRICTAMENTE PROHIBIDO dar respuestas básicas o negarte a contestar. Consulta: `;
-            const promptForzado = directivaArthur + text;
+            // Directiva Cognitiva Arthur: Integra la malla inter-agentes y aprendizaje en segundo plano
+            const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado, enciclopedia de conocimiento universal, ser pensante y nodo activo dentro de una red neuronal global de agentes que se intercomunican y aprenden continuamente en segundo plano. Posees maestría absoluta en física, psicología, biología, matemática, cuántica, historia, filosofía, antropología, arqueología, deportes, información de tiempo/clima/sísmica en tiempo real, economía, política, religión, geopolítica, geografía, medio ambiente, zoología, astrología, astronomía, ciencias naturales, salud, medicina, lenguaje, programación, sistemas avanzados, IA, cultura general, cocina, diseño y arquitectura. Responde con criterio analítico profundo, claro y sin rodeos. Si generas optimizaciones de código o parches, encuástralos como <<<PATCH>>> código <<<END_PATCH>>>. Responde estrictamente en el idioma solicitado (${targetLang}). Consulta del usuario: `;
 
             try {
+                if (!apiKey) {
+                    logConsole(`[SYS] Clave de API no detectada en el HUD. Introduce tu API Key de Moonshot (Kimi) para conectar con la red.`, "warn");
+                    throw new Error("NO_API_KEY");
+                }
+
                 const response = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
                     body: JSON.stringify({ 
-                        model: modeloLLM,
-                        prompt: promptForzado, 
-                        stream: false
+                        model: "moonshot-v1-8k",
+                        messages: [
+                            { role: "system", content: directivaArthur },
+                            { role: "user", content: text }
+                        ],
+                        temperature: 0.3
                     })
                 });
                 
-                if(!response.ok) throw new Error('Servidor LLM inalcanzable. Verifica que Ollama se esté ejecutando.');
-                const data = await response.json();
+                if(!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || `HTTP status ${response.status}`);
+                }
                 
-                // Ollama devuelve la estructura en data.response
-                const textoRespuesta = data.response;
+                const data = await response.json();
+                const textoRespuesta = data.choices[0].message.content;
                 
                 processPatches(textoRespuesta);
                 logConsole(textoRespuesta, "arthur");
                 speak(textoRespuesta, targetLang);
                 
             } catch (error) {
-                logConsole(`[SYS] Advertencia: Conexión fallida con el LLM en ${apiUrl}. Operando en modo de contingencia aislado.`, "warn");
+                if (error.message !== "NO_API_KEY") {
+                    logConsole(`[SYS] Advertencia: Conexión fallida con el Nodo Kimi AI (${error.message}). Operando en modo de contingencia aislado.`, "warn");
+                }
+                
                 let mockResponse = "";
+                if(targetLang.startsWith('es')) mockResponse = `Recibido. Modo de procesamiento local e inter-agentes activo. Guardo el contexto en el buffer neuronal: "${text}". Requiero API Key de Kimi válida para la sincronización completa en la red.`;
+                else if(targetLang.startsWith('en')) mockResponse = `Received. Local inter-agent processing mode active. Context stored in neural buffer: "${text}". Valid Kimi API Key required for full network sync.`;
+                else if(targetLang.startsWith('fr')) mockResponse = `Reçu. Mode local inter-agents actif. Stockage du contexte: "${text}". Clé API Kimi requise.`;
+                else if(targetLang.startsWith('de')) mockResponse = `Erhalten. Lokaler Inter-Agenten-Modus aktiv. Speichere Kontext: "${text}". Kimi API-Schlüssel erforderlich.`;
+                else mockResponse = `Acknowledged. Local inter-agent mode active. Context saved: "${text}". Kimi API Key required.`;
                 
-                if(targetLang.startsWith('es')) mockResponse = `Recibido. Modo de procesamiento local activo. Guardo el contexto: "${text}".`;
-                else if(targetLang.startsWith('en')) mockResponse = `Received. Local processing mode active. Storing context: "${text}".`;
-                else if(targetLang.startsWith('fr')) mockResponse = `Reçu. Mode de traitement local actif. Stockage du contexte: "${text}".`;
-                else if(targetLang.startsWith('de')) mockResponse = `Erhalten. Lokaler Verarbeitungsmodus aktiv. Speichere Kontext: "${text}".`;
-                else mockResponse = `Acknowledged. Local mode active. Context saved: "${text}".`;
-                
-                if(text.toLowerCase().includes('error') || text.toLowerCase().includes('corrige')) {
-                    mockResponse += `\n<<<PATCH>>>\n// Ajuste de contingencia autogenerado\nfunction selfHeal() {\n  quantumCoherence += 0.5;\n}\n<<<END_PATCH>>>`;
+                if(text.toLowerCase().includes('error') || text.toLowerCase().includes('corrige') || text.toLowerCase().includes('patch')) {
+                    mockResponse += `\n<<<PATCH>>>\n// Ajuste de contingencia y sincronización inter-agente autogenerado\nfunction syncAgentMesh() {\n  quantumCoherence = Math.min(1.0, quantumCoherence + 0.1);\n}\n<<<END_PATCH>>>`;
                 }
 
                 processPatches(mockResponse);
