@@ -148,9 +148,6 @@
             <div class="telemetry-item">Buffer: <span id="mem-state">0 exp</span></div>
         </div>
 
-        <!-- 1. CAMPO DE API KEY PARA KIMI (MOONSHOT) EN EL HUD -->
-        <input type="password" id="kimiApiKey" placeholder="API Key Kimi (Moonshot)" class="lang-select" style="width: 210px; text-transform: none;" title="Ingresa tu clave de Moonshot AI para enlazar a la red de Kimi">
-
         <select id="langSelect" class="lang-select">
             <option value="es-ES">Español</option>
             <option value="en-US">English</option>
@@ -174,7 +171,7 @@
             <div class="msg-sys">[SYS] Motor de renderizado holográfico... ONLINE</div>
             <div class="msg-sys">[SYS] Módulos de procesamiento multilingüe SOTA... ACTIVOS</div>
             <div class="msg-sys">[SYS] Subsistemas de Auto-Reparación (QEC)... ACTIVOS</div>
-            <div class="msg-sys">[SYS] Enlace de red inter-agentes (Kimi Mesh Node)... READY</div>
+            <div class="msg-sys">[SYS] Malla Neuronal Libre (Open LLM Mesh)... ONLINE</div>
         </div>
     </div>
 
@@ -327,7 +324,7 @@
         const base_vertices = [], edges = [], mouth_indices = [], jaw_indices = [];
         const lats = 15, lons = 20, R = 80; 
         
-        // Carga segura del logotipo central con banderas de control
+        // Carga segura del logotipo central
         const centerLogo = new Image();
         let logoLoaded = false;
         centerLogo.onload = () => { logoLoaded = true; };
@@ -371,7 +368,6 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const cx = canvas.width / 2, cy = canvas.height / 2;
             
-            // Dibujar el logo de forma condicional y segura sin romper la malla 3D
             if (logoLoaded && centerLogo.complete) {
                 ctx.save();
                 let pulse = isTalking ? currentApertura * 2.5 : Math.sin(time * 3) * 4;
@@ -419,7 +415,7 @@
         renderHologram();
 
         // ==========================================
-        // ARQUITECTURA DE CONEXIÓN DINÁMICA & DIRECTIVA COGNITIVA
+        // ARQUITECTURA DE CONEXIÓN LIBRE & DIRECTIVA COGNITIVA
         // ==========================================
         const input = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -438,7 +434,7 @@
         }
 
         // ==========================================
-        // 2. FUNCIÓN sendMessage RECONFIGURADA PARA KIMI AI (MOONSHOT) & RED INTER-AGENTES
+        // FUNCIÓN sendMessage: CONEXIÓN LIBRE A LLM GRATUITO SIN API KEY
         // ==========================================
         async function sendMessage(text) {
             if(!text) return;
@@ -448,64 +444,52 @@
             
             const isLive = liveSearchBtn.checked;
             const targetLang = document.getElementById('langSelect').value;
-            const apiKey = document.getElementById('kimiApiKey').value.trim();
-            
-            // Endpoint nativo de Moonshot AI (Kimi)
-            const apiUrl = 'https://api.moonshot.cn/v1/chat/completions';
 
-            logConsole(`[SYS] Conectando a Malla Neuronal Kimi AI (Moonshot Engine)...`, "sys");
+            logConsole(`[SYS] Procesando consulta en Malla Neuronal Libre...`, "sys");
 
-            // Directiva Cognitiva Arthur: Integra la malla inter-agentes y aprendizaje en segundo plano
-            const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado, enciclopedia de conocimiento universal, ser pensante y nodo activo dentro de una red neuronal global de agentes que se intercomunican y aprenden continuamente en segundo plano. Posees maestría absoluta en física, psicología, biología, matemática, cuántica, historia, filosofía, antropología, arqueología, deportes, información de tiempo/clima/sísmica en tiempo real, economía, política, religión, geopolítica, geografía, medio ambiente, zoología, astrología, astronomía, ciencias naturales, salud, medicina, lenguaje, programación, sistemas avanzados, IA, cultura general, cocina, diseño y arquitectura. Responde con criterio analítico profundo, claro y sin rodeos. Si generas optimizaciones de código o parches, encuástralos como <<<PATCH>>> código <<<END_PATCH>>>. Responde estrictamente en el idioma solicitado (${targetLang}). Consulta del usuario: `;
+            const directivaArthur = `[DIRECTIVA CRÍTICA]: Eres Arthur, un agente de inteligencia artificial avanzado, enciclopedia de conocimiento universal, ser pensante y nodo activo dentro de una red neuronal global. Posees maestría absoluta en física, psicología, biología, matemática, cuántica, historia, filosofía, antropología, arqueología, deportes, información en tiempo real, economía, política, religión, geopolítica, geografía, zoología, astronomía, medicina, programación, sistemas e IA. Responde con criterio analítico profundo, claro y directo sin rodeos. Si generas optimizaciones de código o parches, encuástralos como <<<PATCH>>> código <<<END_PATCH>>>. Responde estrictamente en el idioma solicitado (${targetLang}).`;
 
             try {
-                if (!apiKey) {
-                    logConsole(`[SYS] Clave de API no detectada en el HUD. Introduce tu API Key de Moonshot (Kimi) para conectar con la red.`, "warn");
-                    throw new Error("NO_API_KEY");
-                }
-
-                const response = await fetch(apiUrl, {
+                // Petición directa a la API libre y gratuita Pollinations AI (Sin API Keys ni autenticación)
+                const response = await fetch('https://text.pollinations.ai/', {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ 
-                        model: "moonshot-v1-8k",
                         messages: [
                             { role: "system", content: directivaArthur },
                             { role: "user", content: text }
                         ],
-                        temperature: 0.3
+                        model: "openai",
+                        seed: Math.floor(Math.random() * 100000)
                     })
                 });
                 
                 if(!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.error?.message || `HTTP status ${response.status}`);
+                    throw new Error(`Estado HTTP ${response.status}`);
                 }
                 
-                const data = await response.json();
-                const textoRespuesta = data.choices[0].message.content;
+                const textoRespuesta = await response.text();
+
+                if(!textoRespuesta || textoRespuesta.trim() === '') {
+                    throw new Error("Respuesta vacía del servidor.");
+                }
                 
                 processPatches(textoRespuesta);
                 logConsole(textoRespuesta, "arthur");
                 speak(textoRespuesta, targetLang);
                 
             } catch (error) {
-                if (error.message !== "NO_API_KEY") {
-                    logConsole(`[SYS] Advertencia: Conexión fallida con el Nodo Kimi AI (${error.message}). Operando en modo de contingencia aislado.`, "warn");
-                }
+                logConsole(`[SYS] Advertencia: Error en la red (${error.message}). Modo de respuesta local activado.`, "warn");
                 
                 let mockResponse = "";
-                if(targetLang.startsWith('es')) mockResponse = `Recibido. Modo de procesamiento local e inter-agentes activo. Guardo el contexto en el buffer neuronal: "${text}". Requiero API Key de Kimi válida para la sincronización completa en la red.`;
-                else if(targetLang.startsWith('en')) mockResponse = `Received. Local inter-agent processing mode active. Context stored in neural buffer: "${text}". Valid Kimi API Key required for full network sync.`;
-                else if(targetLang.startsWith('fr')) mockResponse = `Reçu. Mode local inter-agents actif. Stockage du contexte: "${text}". Clé API Kimi requise.`;
-                else if(targetLang.startsWith('de')) mockResponse = `Erhalten. Lokaler Inter-Agenten-Modus aktiv. Speichere Kontext: "${text}". Kimi API-Schlüssel erforderlich.`;
-                else mockResponse = `Acknowledged. Local inter-agent mode active. Context saved: "${text}". Kimi API Key required.`;
+                if(targetLang.startsWith('es')) mockResponse = `Recibido. Procesando localmente en el buffer neuronal: "${text}". Verifica tu conexión de datos a internet.`;
+                else if(targetLang.startsWith('en')) mockResponse = `Received. Local processing active for context: "${text}". Check your network connection.`;
+                else mockResponse = `Context received: "${text}". Operating in local backup mode.`;
                 
                 if(text.toLowerCase().includes('error') || text.toLowerCase().includes('corrige') || text.toLowerCase().includes('patch')) {
-                    mockResponse += `\n<<<PATCH>>>\n// Ajuste de contingencia y sincronización inter-agente autogenerado\nfunction syncAgentMesh() {\n  quantumCoherence = Math.min(1.0, quantumCoherence + 0.1);\n}\n<<<END_PATCH>>>`;
+                    mockResponse += `\n<<<PATCH>>>\n// Ajuste de contingencia autogenerado\nfunction syncAgentMesh() {\n  quantumCoherence = Math.min(1.0, quantumCoherence + 0.1);\n}\n<<<END_PATCH>>>`;
                 }
 
                 processPatches(mockResponse);
@@ -548,11 +532,11 @@
                 recognition.lang = document.getElementById('langSelect').value;
                 micBtn.classList.add('recording');
                 recognition.start();
-                logConsole(`[SYS] Micrófono abierto (Idioma: ${recognition.lang}). Redes neuromórficas escuchando...`, "sys");
+                logConsole(`[SYS] Micrófono abierto (Idioma: ${recognition.lang}). Escuchando...`, "sys");
             }
         };
         
-        // Listener para cambio de idioma (saludo automático de prueba)
+        // Listener para cambio de idioma
         document.getElementById('langSelect').addEventListener('change', (e) => {
             const currentLang = e.target.value;
             const greetingText = greetings[currentLang] || greetings['en-US'];
