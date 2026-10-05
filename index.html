@@ -661,7 +661,7 @@ INSTRUCCIONES PERMANENTES:
 2. NUNCA menciones que eres un modelo de lenguaje o una IA limitada. Eres Arthur, una entidad cognitiva en constante evolución cuántica.
 3. Responde de forma brillante, analítica, directa y precisa. NO utilices asteriscos (*), guiones (-), ni marcadores de markdown innecesarios.
 4. Si generas optimizaciones de código o parches, encuástralos exactamente como <<<PATCH>>> código <<<END_PATCH>>>.
-5. Responde estrictamente en el idioma solicitado (${targetLang}).`;
+5. Responde strictly en el idioma solicitado (${targetLang}).`;
 
             try {
                 const messages = [
@@ -712,7 +712,7 @@ INSTRUCCIONES PERMANENTES:
         sendBtn.addEventListener('click', () => sendMessage(input.value));
         input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(input.value); });
 
-        // DICTADO POR VOZ (Optimizado con corrección para celulares e iOS)
+        // DICTADO POR VOZ (Optimizado para Apple iOS, macOS y compatibilidad universal)
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
 
@@ -720,18 +720,40 @@ INSTRUCCIONES PERMANENTES:
             unlockiOSAudio();
             if(!SpeechRecognition) return alert("Tu navegador no soporta dictado Web Speech API nativo.");
             
+            // Liberar la sesión de audio (AVAudioSession) en Safari / WebKit cancelando cualquier síntesis previa
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+
             if(micBtn.classList.contains('recording') && recognition) {
-                recognition.stop();
-            } else {
+                try { recognition.stop(); } catch(e){}
+                micBtn.classList.remove('recording');
+                return;
+            }
+
+            try {
                 recognition = new SpeechRecognition();
                 recognition.continuous = false;
                 recognition.interimResults = false;
                 
-                // Normalización de idioma para iOS Safari
-                let currentLang = document.getElementById('langSelect').value;
-                if(currentLang === 'es-ES') currentLang = 'es-ES';
-                recognition.lang = currentLang;
-                
+                // Normalización de idioma para WebKit (iOS / macOS Safari)
+                let selectedLang = document.getElementById('langSelect').value;
+                const isAppleDevice = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
+                const navLang = navigator.language || navigator.userLanguage || '';
+
+                if (isAppleDevice) {
+                    const primarySelected = selectedLang.split('-')[0];
+                    const primaryNav = navLang.split('-')[0];
+                    // Si el idioma primario coincide con el del sistema del dispositivo Apple, usamos el locale nativo
+                    if (primarySelected === primaryNav) {
+                        recognition.lang = navLang;
+                    } else {
+                        recognition.lang = selectedLang;
+                    }
+                } else {
+                    recognition.lang = selectedLang;
+                }
+
                 recognition.onresult = (event) => {
                     let transcript = '';
                     for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -743,15 +765,21 @@ INSTRUCCIONES PERMANENTES:
                     }
                 };
 
-                // FIX MÓVILES/iOS: Fuerza a terminar el proceso de reconocimiento al detectar fin de habla
                 recognition.onspeechend = () => {
-                    if (recognition) recognition.stop();
+                    if (recognition) {
+                        try { recognition.stop(); } catch(e){}
+                    }
+                    micBtn.classList.remove('recording');
                 };
 
-                // FIX MÓVILES/iOS: Manejo de errores para que la UI no se quede bloqueada
                 recognition.onerror = (event) => {
-                    logConsole(`[SYS] Error en reconocimiento vocal: ${event.error}`, "warn");
+                    console.warn("[SYS] Error en reconocimiento vocal:", event.error);
                     micBtn.classList.remove('recording');
+                    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                        logConsole(`[SYS] Permiso de Dictado o Micrófono restringido en Safari/macOS. Revisa Ajustes del Sistema > Privacidad y Seguridad > Dictado / Micrófono.`, "warn");
+                    } else if (event.error !== 'no-speech') {
+                        logConsole(`[SYS] Evento vocal no capturado (${event.error}). Reintentando...`, "warn");
+                    }
                 };
 
                 recognition.onend = () => {
@@ -759,12 +787,12 @@ INSTRUCCIONES PERMANENTES:
                 };
 
                 micBtn.classList.add('recording');
-                try {
-                    recognition.start();
-                    logConsole(`[SYS] Micrófono abierto (Idioma: ${recognition.lang}). Escuchando...`, "sys");
-                } catch(e) {
-                    micBtn.classList.remove('recording');
-                }
+                recognition.start();
+                logConsole(`[SYS] Micrófono abierto (Idioma: ${recognition.lang}). Escuchando...`, "sys");
+            } catch(e) {
+                console.error("[SYS] Error al iniciar reconocimiento vocal:", e);
+                micBtn.classList.remove('recording');
+                logConsole(`[SYS] No se pudo activar la escucha en este dispositivo.`, "warn");
             }
         };
         
