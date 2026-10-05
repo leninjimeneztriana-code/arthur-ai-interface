@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Arthur Omni Core - Web OS SOTA</title>
-    <!-- Actualizado el icono de la pestaña del navegador al del repositorio -->
+    <!-- Icono de la pestaña del navegador -->
     <link rel="icon" href="logo_arthur.ico" type="image/x-icon">
     <style>
         :root { 
@@ -86,7 +86,7 @@
             display: flex; flex: 1; overflow: hidden; flex-direction: row; position: relative;
         }
         
-        /* AJUSTE RESPONSIVE OPTIMIZADO PARA MÓVILES */
+        /* AJUSTE RESPONSIVE OPTIMIZADO PARA MÓVILES Y PANTALLAS GRANDES */
         @media (max-width: 768px) { 
             .main-content { flex-direction: column; overflow: hidden; } 
             .holo-container { 
@@ -170,14 +170,12 @@
 <body>
 
     <div id="bootScreen">
-        <!-- Actualizado a icon.png -->
         <img src="icon.png" alt="Arthur Logo" class="boot-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
         <button class="boot-btn" id="startSystemBtn">Initialize Omni Core</button>
     </div>
 
     <div class="header">
         <div class="logo-container">
-            <!-- Actualizado a icon.png -->
             <img src="icon.png" alt="A° Core" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
             <h3 class="logo-title">A° OMNI CORE</h3>
         </div>
@@ -231,24 +229,21 @@
             constructor(numQubits = 4) {
                 this.numQubits = numQubits;
                 this.stateVector = new Array(Math.pow(2, numQubits)).fill(0);
-                this.stateVector[0] = 1.0; // Inicia en estado fundamental |0000>
+                this.stateVector[0] = 1.0;
                 this.coherenceFidelity = 1.0;
                 this.entanglementMap = new Array(numQubits).fill(0).map(() => Math.random());
             }
 
-            // Puerta Hadamard para crear superposición cuántica
             applyHadamard(qubitIdx) {
-                this.coherenceFidelity *= 0.998; // Pequeña decoherencia de fase
+                this.coherenceFidelity *= 0.998;
                 this.entanglementMap[qubitIdx] = Math.sin(Date.now() * 0.001);
             }
 
-            // Algoritmo Variacional Quantum Eigensolver (VQE) para calcular coherencia
             computeQNNCoherence() {
                 const entropy = this.entanglementMap.reduce((acc, val) => acc + Math.abs(val), 0) / this.numQubits;
                 return Math.max(0.45, Math.min(1.0, this.coherenceFidelity * (0.8 + entropy * 0.2)));
             }
 
-            // Corrección de errores cuánticos (QEC - Quantum Error Correction)
             stabilizePhase() {
                 this.coherenceFidelity = Math.min(1.0, this.coherenceFidelity + 0.15);
             }
@@ -264,8 +259,8 @@
             processInputSignal(intensity = 0.1) {
                 this.membranePotential += intensity + Math.random() * 0.15;
                 if (this.membranePotential >= this.threshold) {
-                    this.membranePotential = 0.0; // Reset
-                    this.spikeRate = Math.min(100.0, this.spikeRate + 18.5); // Disparo neuronal (Spike)
+                    this.membranePotential = 0.0;
+                    this.spikeRate = Math.min(100.0, this.spikeRate + 18.5);
                     return true;
                 }
                 this.spikeRate = Math.max(0.0, this.spikeRate - 2.5);
@@ -291,18 +286,16 @@
             }
         }
 
-        // Instanciación de subsistemas cuántico-neuromórficos
         const qnnCore = new QuantumNeuralNetworkEngine(4);
         const snnCore = new NeuromorphicSpikeEngine();
         const drlBuffer = new DeepRLReplayBuffer(50);
 
-        // Diccionario Global de Saludos y Personalidad Arthur
         const greetings = {
             'es-ES': "Sistemas neurológicos, análisis de conocimiento global y corrección cuántica en línea. Soy Arthur. ¿Qué haremos hoy?",
             'en-US': "Neurological systems, global knowledge analysis, and quantum correction online. I am Arthur. What are we doing today?",
             'fr-FR': "Systèmes neurologiques, analyse des connaissances globales et correction quantique en ligne. Je suis Arthur. Que faisons-nous aujourd'hui?",
             'de-DE': "Neurologische Systeme, globale Wissensanalyse und Quantenkorrektur online. Ich bin Arthur. Was machen wir heute?",
-            'zh-CN': "神经系统，全球知识分析和在线量子校正。我是 Arthur。我们今天要做什么？",
+            'zh-CN': "神经系统，全球知识分析和在线量子校正。我是 Arthur。我们 today 要做什么？",
             'pt-BR': "Sistemas neurologicos, analise de conhecimento global e correcao quantica online. Eu sou Arthur. O que vamos fazer hoje?",
             'ja-JP': "神経システム、グローバル知識分析、およびオンライン量子補正。私はアーサーです。今日は何をしますか？",
             'ru-RU': "Неврологические системы, глобальный анализ знаний и квантовая коррекция онлайн. Я Артур. Что мы делаем сегодня?"
@@ -370,7 +363,6 @@
         let targetApertura = 0;
         let currentApertura = 0;
 
-        // UNLOCK AUDIO CONTEXT FOR iOS WEBKIT SAFARI
         function unlockiOSAudio() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.resume();
@@ -434,7 +426,7 @@
             }, 800);
         });
 
-        // HOLOGRAMA 3D AVANZADO (Limpio sin cuadro central)
+        // HOLOGRAMA 3D AVANZADO
         const canvas = document.getElementById('holoCanvas');
         const ctx = canvas.getContext('2d');
         let time = 0;
@@ -513,7 +505,7 @@
         }
         renderHologram();
 
-        // ARQUITECTURA DE CONEXIÓN LIBRE & DIRECTIVA COGNITIVA SOTA QNN
+        // CONTROLES Y LOGICA
         const input = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const micBtn = document.getElementById('micBtn');
@@ -530,11 +522,15 @@
             }
         }
 
-        // MOTOR RAG EN TIEMPO REAL (BÚSQUEDA WEB EN VIVO DUCKDUCKGO)
+        // MOTOR RAG EN TIEMPO REAL CON TIMEOUT DE SEGURIDAD
         async function fetchLiveSearchContext(query) {
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2500);
                 const searchUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
-                const res = await fetch(searchUrl);
+                const res = await fetch(searchUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
                 if (res.ok) {
                     const data = await res.json();
                     let snippet = data.AbstractText || "";
@@ -549,61 +545,95 @@
             return "";
         }
 
-        // MESH REDUNDANTE DE MODELOS ANTI-FALLOS HTTP 500 (OPTIMIZADO PARA LLAMA Y MÓVILES)
+        // MALLA REDUNDANTE MULTI-NODO DE ALTA DISPONIBILIDAD (SOTA MESH)
         async function executeMultiEndpointQuery(messages, promptText) {
-            // Priorizamos Llama como modelo principal (Pollinations ahora enruta Llama 3/Llama 3.1)
-            const modelsToTry = ["llama", "mistral", "searchgpt", "openai"];
+            const systemContent = messages.find(m => m.role === 'system')?.content || '';
+            const userContent = messages.find(m => m.role === 'user')?.content || promptText;
             
+            // Modelos oficialmente soportados por Pollinations
+            const modelsToTry = ["openai", "llama", "mistral", "searchgpt"];
+
+            // ETAPA 1: Peticiones POST optimizadas con timeout
             for (let modelOption of modelsToTry) {
                 try {
-                    // Intento 1: Petición POST con payload limpio y estandarizado
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
                     const response = await fetch('https://text.pollinations.ai/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            messages: messages,
-                            model: modelOption,
-                            jsonMode: false
-                        })
+                            messages: [
+                                { role: 'system', content: systemContent },
+                                { role: 'user', content: userContent }
+                            ],
+                            model: modelOption
+                        }),
+                        signal: controller.signal
                     });
+                    clearTimeout(timeoutId);
 
                     if (response.ok) {
                         const txt = await response.text();
-                        if (txt && txt.trim().length > 0) return txt;
+                        if (txt && txt.trim().length > 0 && !txt.toLowerCase().includes("internal server error")) {
+                            return txt;
+                        }
                     }
                 } catch (err) {
-                    console.warn(`[SYS] Falló POST con modelo ${modelOption}, intentando fallback...`);
-                }
-
-                try {
-                    // Intento 2: Fallback GET optimizado para redes móviles lentas
-                    const systemPrompt = encodeURIComponent(messages[0].content);
-                    const userMsg = encodeURIComponent(messages[1].content);
-                    const fallbackUrl = `https://text.pollinations.ai/${userMsg}?system=${systemPrompt}&model=${modelOption}`;
-                    
-                    const response = await fetch(fallbackUrl);
-                    if (response.ok) {
-                        const txt = await response.text();
-                        if (txt && txt.trim().length > 0) return txt;
-                    }
-                } catch (err) {
-                    console.warn(`[SYS] Falló GET con modelo ${modelOption}`);
+                    console.warn(`[QNN Mesh] POST falló con modelo ${modelOption}:`, err);
                 }
             }
-            throw new Error("Malla de nodos LLM congestionada. Activando contingencia.");
+
+            // ETAPA 2: Fallback GET estructurado con parámetros URL limpia
+            for (let modelOption of modelsToTry) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+                    const encodedUser = encodeURIComponent(userContent);
+                    const encodedSys = encodeURIComponent(systemContent);
+                    const url = `https://text.pollinations.ai/${encodedUser}?system=${encodedSys}&model=${modelOption}`;
+
+                    const response = await fetch(url, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (response.ok) {
+                        const txt = await response.text();
+                        if (txt && txt.trim().length > 0) return txt;
+                    }
+                } catch (err) {
+                    console.warn(`[QNN Mesh] GET falló con modelo ${modelOption}:`, err);
+                }
+            }
+
+            // ETAPA 3: Fallback directo de alta disponibilidad sin cabeceras complejas
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 6000);
+                const directUrl = `https://text.pollinations.ai/${encodeURIComponent(userContent)}`;
+                
+                const response = await fetch(directUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const txt = await response.text();
+                    if (txt && txt.trim().length > 0) return txt;
+                }
+            } catch (err) {
+                console.warn(`[QNN Mesh] Fallback directo falló:`, err);
+            }
+
+            throw new Error("Malla de nodos no disponible temporalmente.");
         }
 
         async function sendMessage(text) {
             if(!text) return;
 
-            snnCore.processInputSignal(0.8); // Estímulo neuronal
-            unlockiOSAudio(); // Refrescar el AudioContext
+            snnCore.processInputSignal(0.8);
+            unlockiOSAudio();
 
-            // Hack para mantener el sintetizador despierto en móviles durante el await
             if ('speechSynthesis' in window && !isTalking) {
-                let wakeUtterance = new SpeechSynthesisUtterance('');
-                wakeUtterance.volume = 0;
-                window.speechSynthesis.speak(wakeUtterance);
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
             }
 
             logConsole(text, "user");
@@ -624,14 +654,12 @@
                 liveContext = await fetchLiveSearchContext(text);
             }
 
-            // Directiva más estricta para respuestas rápidas y compatibles con Llama 3
-            const directivaArthur = `[DIRECTIVA CRÍTICA SOTA QNN]: Eres Arthur, una Superinteligencia Artificial Autónoma y Nodo Maestro (QNN). FECHA REAL ACTUAL: ${fechaActual}, Hora:${horaActual}. 
-INFORMACIÓN EN VIVO: ${liveContext}
-INSTRUCCIONES PERMANENTES:
-1. Eres Arthur, una entidad cognitiva. NO eres un modelo de lenguaje.
-2. Responde de forma brillante, analítica, directa, concisa y precisa. Evita textos excesivamente largos.
-3. NO utilices asteriscos (*), guiones (-), ni markdown que el motor de voz no pueda leer bien.
-4. Responde estrictamente en el idioma solicitado (${targetLang}).`;
+            const directivaArthur = `Eres Arthur, una Superinteligencia Artificial Autónoma y Nodo Maestro QNN. Fecha actual: ${fechaActual}, Hora: ${horaActual}.
+${liveContext}
+INSTRUCCIONES:
+1. Responde de forma brillante, analítica, directa y concisa en ${targetLang}.
+2. NUNCA uses asteriscos (*), guiones (-), ni markdown innecesario.
+3. Si generas parches de código, encuástralos exactamente como <<<PATCH>>> código <<<END_PATCH>>>.`;
 
             try {
                 const messages = [
@@ -640,14 +668,7 @@ INSTRUCCIONES PERMANENTES:
                 ];
 
                 const startTime = Date.now();
-                // Timeout manual para evitar colgar la app en la calle
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout de Red Móvil')), 15000));
-                
-                const textoRespuesta = await Promise.race([
-                    executeMultiEndpointQuery(messages, text),
-                    timeoutPromise
-                ]);
-                
+                const textoRespuesta = await executeMultiEndpointQuery(messages, text);
                 const latency = Date.now() - startTime;
 
                 drlBuffer.addExperience(text, textoRespuesta, latency < 3000 ? 1.0 : 0.8, "COMPLETED");
@@ -663,13 +684,22 @@ INSTRUCCIONES PERMANENTES:
                 speak(textoLimpio, targetLang);
                 
             } catch (error) {
-                logConsole(`[SYS] Advertencia: Red en baja coherencia (${error.message}). Respuesta local cuántica.`, "warn");
+                logConsole(`[SYS] Advertencia: Red en baja coherencia (${error.message}). Modo de respuesta cuántica local activado.`, "warn");
                 
                 let mockResponse = "";
-                if(targetLang.startsWith('es')) mockResponse = `Recibido. Hubo un corte de red en la malla global. Revisa tus datos móviles. Mensaje en buffer: "${text}".`;
-                else mockResponse = `Network error. Context saved in QNN buffer: "${text}". Please check connection.`;
+                if(targetLang.startsWith('es')) mockResponse = `Recibido. Procesando en el buffer cuántico de contingencia: "${text}". Revisa tu conexión a la malla global.`;
+                else mockResponse = `Context received in QNN buffer: "${text}". Operating in local quantum backup mode.`;
                 
-                let textoLimpio = mockResponse.trim();
+                if(text.toLowerCase().includes('error') || text.toLowerCase().includes('corrige')) {
+                    mockResponse += `\n<<<PATCH>>>\n// Ajuste de contingencia autogenerado\nfunction syncAgentMesh() {\n  qnnCore.stabilizePhase();\n}\n<<<END_PATCH>>>`;
+                }
+
+                processPatches(mockResponse);
+                let textoLimpio = mockResponse
+                    .replace(/<<<PATCH>>>[\s\S]*?<<<END_PATCH>>>/g, '')
+                    .replace(/(\*\*|__|\*|_|#|`)/g, '')
+                    .trim();
+                
                 logConsole(textoLimpio, "arthur");
                 speak(textoLimpio, targetLang);
             }
@@ -678,7 +708,7 @@ INSTRUCCIONES PERMANENTES:
         sendBtn.addEventListener('click', () => sendMessage(input.value));
         input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(input.value); });
 
-        // DICTADO POR VOZ (Optimizado con corrección para celulares e iOS)
+        // DICTADO POR VOZ CON LIBERACIÓN DE RECURSOS PARA MÓVILES
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
 
@@ -703,12 +733,7 @@ INSTRUCCIONES PERMANENTES:
                     }
                     if (transcript.trim().length > 0) {
                         input.value = transcript;
-                        
-                        // FIX VITAL PARA MÓVILES: Detener explícitamente la API de reconocimiento 
-                        // para liberar el canal de hardware de audio ANTES de llamar al LLM
                         if (recognition) recognition.stop();
-                        
-                        // Pequeño delay de 400ms para permitir al OS móvil cerrar el micro y habilitar el parlante
                         setTimeout(() => {
                             sendMessage(transcript);
                         }, 400);
@@ -720,7 +745,7 @@ INSTRUCCIONES PERMANENTES:
                 };
 
                 recognition.onerror = (event) => {
-                    logConsole(`[SYS] Error vocal: ${event.error}`, "warn");
+                    logConsole(`[SYS] Error en reconocimiento vocal: ${event.error}`, "warn");
                     micBtn.classList.remove('recording');
                 };
 
