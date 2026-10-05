@@ -530,18 +530,24 @@
             }
         }
 
-        // MOTOR RAG EN TIEMPO REAL (BÚSQUEDA WEB EN VIVO DUCKDUCKGO)
+        // MOTOR RAG EN TIEMPO REAL (MEJORADO CON PROXY CORS PARA MÓVILES)
         async function fetchLiveSearchContext(query) {
             try {
                 const searchUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
-                const res = await fetch(searchUrl);
+                // Proxy AllOrigins para saltar barreras CORS de DuckDuckGo en iOS/Android
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`;
+                
+                const res = await fetch(proxyUrl);
                 if (res.ok) {
-                    const data = await res.json();
-                    let snippet = data.AbstractText || "";
-                    if (!snippet && data.RelatedTopics && data.RelatedTopics.length > 0) {
-                        snippet = data.RelatedTopics[0].Text || "";
+                    const dataWrapper = await res.json();
+                    if(dataWrapper.contents) {
+                        const data = JSON.parse(dataWrapper.contents);
+                        let snippet = data.AbstractText || "";
+                        if (!snippet && data.RelatedTopics && data.RelatedTopics.length > 0) {
+                            snippet = data.RelatedTopics[0].Text || "";
+                        }
+                        return snippet ? `[CONTEXTO WEB EN VIVO EN TIEMPO REAL]: ${snippet}` : "";
                     }
-                    return snippet ? `[CONTEXTO WEB EN VIVO EN TIEMPO REAL]: ${snippet}` : "";
                 }
             } catch (e) {
                 console.warn("Live Search bypass:", e);
@@ -549,46 +555,72 @@
             return "";
         }
 
-        // MESH REDUNDANTE DE MODELOS ANTI-FALLOS HTTP 500
+        // MESH REDUNDANTE DE MODELOS ANTI-FALLOS (MEJORADO CONTRA 414 Y CORS)
         async function executeMultiEndpointQuery(messages, promptText) {
-            const modelsToTry = ["openai", "qwen-coder", "mistral", "llama"];
+            // Modelos estandarizados garantizados en la API libre actual
+            const modelsToTry = ["openai", "mistral", "llama", "search"];
             
             for (let modelOption of modelsToTry) {
                 try {
-                    // Intento 1: Petición POST
+                    // Intento 1: Petición POST (La más robusta para contextos completos)
                     const response = await fetch('https://text.pollinations.ai/', {
                         method: 'POST',
+                        mode: 'cors',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             messages: messages,
-                            model: modelOption,
-                            seed: Math.floor(Math.random() * 1000000)
+                            model: modelOption
                         })
                     });
 
                     if (response.ok) {
                         const txt = await response.text();
-                        if (txt && txt.trim().length > 0) return txt;
+                        // Evita interpretar páginas de error 502 como texto de IA
+                        if (txt && txt.trim().length > 0 && !txt.startsWith('<!DOCTYPE')) return txt;
                     }
                 } catch (err) {
-                    console.warn(`Falló POST con modelo ${modelOption}, intentando GET...`);
+                    console.warn(`[QNN] Falló POST con modelo ${modelOption}, saltando a GET...`);
                 }
 
                 try {
-                    // Intento 2: Fallback GET
-                    const systemPrompt = encodeURIComponent(messages[0].content);
-                    const userMsg = encodeURIComponent(messages[1].content);
-                    const fallbackUrl = `https://text.pollinations.ai/${userMsg}?system=${systemPrompt}&model=${modelOption}&seed=${Math.floor(Math.random() * 1000000)}`;
+                    // Intento 2: Fallback GET (Truncando System Prompt para evitar Error 414 URI Too Long)
+                    let sysContent = messages[0].content;
+                    // Limitar a 500 caracteres para asegurar que la URL no sobrepase los límites de los navegadores móviles
+                    if (sysContent.length > 500) sysContent = sysContent.substring(0, 500) + "... [TRUNCATED]";
                     
-                    const response = await fetch(fallbackUrl);
+                    const systemPrompt = encodeURIComponent(sysContent);
+                    const userMsg = encodeURIComponent(messages[1].content);
+                    const fallbackUrl = `https://text.pollinations.ai/${userMsg}?system=${systemPrompt}&model=${modelOption}`;
+                    
+                    const response = await fetch(fallbackUrl, { mode: 'cors' });
                     if (response.ok) {
                         const txt = await response.text();
-                        if (txt && txt.trim().length > 0) return txt;
+                        if (txt && txt.trim().length > 0 && !txt.startsWith('<!DOCTYPE')) return txt;
                     }
                 } catch (err) {
-                    console.warn(`Falló GET con modelo ${modelOption}`);
+                    console.warn(`[QNN] Falló GET con modelo ${modelOption}, saltando a Proxy CORS...`);
+                }
+
+                try {
+                    // Intento 3: Proxy AllOrigins (Última defensa si el navegador móvil bloquea Fetch externo)
+                    let sysContent = messages[0].content;
+                    if (sysContent.length > 400) sysContent = sysContent.substring(0, 400) + "...";
+                    
+                    const systemPrompt = encodeURIComponent(sysContent);
+                    const userMsg = encodeURIComponent(messages[1].content);
+                    const targetUrl = `https://text.pollinations.ai/${userMsg}?system=${systemPrompt}&model=${modelOption}`;
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+                    
+                    const response = await fetch(proxyUrl);
+                    if (response.ok) {
+                        const txt = await response.text();
+                        if (txt && txt.trim().length > 0 && !txt.startsWith('<!DOCTYPE')) return txt;
+                    }
+                } catch (err) {
+                    console.warn(`[QNN] Falló Proxy con modelo ${modelOption}`);
                 }
             }
+            // Si todo el Mesh falla, disparamos el error que activará la contingencia local
             throw new Error("Malla de nodos congestionada. Activando procesamiento distribuido local.");
         }
 
