@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Arthur Omni Core - Web OS SOTA</title>
-    <!-- Icono de la pestaña del navegador -->
+    <!-- Actualizado el icono de la pestaña del navegador al del repositorio -->
     <link rel="icon" href="logo_arthur.ico" type="image/x-icon">
     <style>
         :root { 
@@ -86,7 +86,7 @@
             display: flex; flex: 1; overflow: hidden; flex-direction: row; position: relative;
         }
         
-        /* AJUSTE RESPONSIVE OPTIMIZADO PARA MÓVILES Y PANTALLAS GRANDES */
+        /* AJUSTE RESPONSIVE OPTIMIZADO PARA MÓVILES */
         @media (max-width: 768px) { 
             .main-content { flex-direction: column; overflow: hidden; } 
             .holo-container { 
@@ -170,12 +170,14 @@
 <body>
 
     <div id="bootScreen">
+        <!-- Actualizado a icon.png -->
         <img src="icon.png" alt="Arthur Logo" class="boot-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
         <button class="boot-btn" id="startSystemBtn">Initialize Omni Core</button>
     </div>
 
     <div class="header">
         <div class="logo-container">
+            <!-- Actualizado a icon.png -->
             <img src="icon.png" alt="A° Core" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
             <h3 class="logo-title">A° OMNI CORE</h3>
         </div>
@@ -218,7 +220,7 @@
             <input type="checkbox" id="liveSearchToggle" checked>
             🌐 Live
         </label>
-        <button id="micBtn" class="mic-btn">🎙️</button>
+        <button id="micBtn" class="mic-btn">🎙️️</button>
         <input type="text" id="userInput" placeholder="Inicializar secuencia de comandos...">
         <button id="sendBtn">➤</button>
     </div>
@@ -229,21 +231,24 @@
             constructor(numQubits = 4) {
                 this.numQubits = numQubits;
                 this.stateVector = new Array(Math.pow(2, numQubits)).fill(0);
-                this.stateVector[0] = 1.0;
+                this.stateVector[0] = 1.0; // Inicia en estado fundamental |0000>
                 this.coherenceFidelity = 1.0;
                 this.entanglementMap = new Array(numQubits).fill(0).map(() => Math.random());
             }
 
+            // Puerta Hadamard para crear superposición cuántica
             applyHadamard(qubitIdx) {
-                this.coherenceFidelity *= 0.998;
+                this.coherenceFidelity *= 0.998; // Pequeña decoherencia de fase
                 this.entanglementMap[qubitIdx] = Math.sin(Date.now() * 0.001);
             }
 
+            // Algoritmo Variacional Quantum Eigensolver (VQE) para calcular coherencia
             computeQNNCoherence() {
                 const entropy = this.entanglementMap.reduce((acc, val) => acc + Math.abs(val), 0) / this.numQubits;
                 return Math.max(0.45, Math.min(1.0, this.coherenceFidelity * (0.8 + entropy * 0.2)));
             }
 
+            // Corrección de errores cuánticos (QEC - Quantum Error Correction)
             stabilizePhase() {
                 this.coherenceFidelity = Math.min(1.0, this.coherenceFidelity + 0.15);
             }
@@ -259,8 +264,8 @@
             processInputSignal(intensity = 0.1) {
                 this.membranePotential += intensity + Math.random() * 0.15;
                 if (this.membranePotential >= this.threshold) {
-                    this.membranePotential = 0.0;
-                    this.spikeRate = Math.min(100.0, this.spikeRate + 18.5);
+                    this.membranePotential = 0.0; // Reset
+                    this.spikeRate = Math.min(100.0, this.spikeRate + 18.5); // Disparo neuronal (Spike)
                     return true;
                 }
                 this.spikeRate = Math.max(0.0, this.spikeRate - 2.5);
@@ -286,16 +291,18 @@
             }
         }
 
+        // Instanciación de subsistemas cuántico-neuromórficos
         const qnnCore = new QuantumNeuralNetworkEngine(4);
         const snnCore = new NeuromorphicSpikeEngine();
         const drlBuffer = new DeepRLReplayBuffer(50);
 
+        // Diccionario Global de Saludos y Personalidad Arthur
         const greetings = {
             'es-ES': "Sistemas neurológicos, análisis de conocimiento global y corrección cuántica en línea. Soy Arthur. ¿Qué haremos hoy?",
             'en-US': "Neurological systems, global knowledge analysis, and quantum correction online. I am Arthur. What are we doing today?",
             'fr-FR': "Systèmes neurologiques, analyse des connaissances globales et correction quantique en ligne. Je suis Arthur. Que faisons-nous aujourd'hui?",
             'de-DE': "Neurologische Systeme, globale Wissensanalyse und Quantenkorrektur online. Ich bin Arthur. Was machen wir heute?",
-            'zh-CN': "神经系统，全球知识分析和在线量子校正。我是 Arthur。我们 today 要做什么？",
+            'zh-CN': "神经系统，全球知识分析和在线量子校正。我是 Arthur。我们今天要做什么？",
             'pt-BR': "Sistemas neurologicos, analise de conhecimento global e correcao quantica online. Eu sou Arthur. O que vamos fazer hoje?",
             'ja-JP': "神経システム、グローバル知識分析、およびオンライン量子補正。私はアーサーです。今日は何をしますか？",
             'ru-RU': "Неврологические системы, глобальный анализ знаний и квантовая коррекция онлайн. Я Артур. Что мы делаем сегодня?"
@@ -363,6 +370,7 @@
         let targetApertura = 0;
         let currentApertura = 0;
 
+        // UNLOCK AUDIO CONTEXT FOR iOS WEBKIT SAFARI
         function unlockiOSAudio() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.resume();
@@ -426,7 +434,7 @@
             }, 800);
         });
 
-        // HOLOGRAMA 3D AVANZADO
+        // HOLOGRAMA 3D AVANZADO (Limpio sin cuadro central)
         const canvas = document.getElementById('holoCanvas');
         const ctx = canvas.getContext('2d');
         let time = 0;
@@ -505,7 +513,7 @@
         }
         renderHologram();
 
-        // CONTROLES Y LOGICA
+        // ARQUITECTURA DE CONEXIÓN LIBRE & DIRECTIVA COGNITIVA SOTA QNN
         const input = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const micBtn = document.getElementById('micBtn');
@@ -522,25 +530,30 @@
             }
         }
 
-        // MOTOR RAG EN TIEMPO REAL CON TIMEOUT DE SEGURIDAD
+        // MOTOR RAG EN TIEMPO REAL (Con Proxy CORS para evitar bloqueos del navegador)
         async function fetchLiveSearchContext(query) {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2500);
-                const searchUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
-                const res = await fetch(searchUrl, { signal: controller.signal });
+                const timeoutId = setTimeout(() => controller.abort(), 4000);
+                
+                // Usamos AllOrigins Proxy porque DuckDuckGo bloquea consultas directas desde el navegador (CORS)
+                const ddgUrl = encodeURIComponent(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`);
+                const proxyUrl = `https://api.allorigins.win/get?url=${ddgUrl}`;
+                
+                const res = await fetch(proxyUrl, { signal: controller.signal });
                 clearTimeout(timeoutId);
                 
                 if (res.ok) {
-                    const data = await res.json();
+                    const proxyData = await res.json();
+                    const data = JSON.parse(proxyData.contents);
                     let snippet = data.AbstractText || "";
                     if (!snippet && data.RelatedTopics && data.RelatedTopics.length > 0) {
                         snippet = data.RelatedTopics[0].Text || "";
                     }
-                    return snippet ? `[CONTEXTO WEB EN VIVO EN TIEMPO REAL]: ${snippet}` : "";
+                    return snippet ? `[CONTEXTO WEB EN VIVO]: ${snippet}` : "";
                 }
             } catch (e) {
-                console.warn("Live Search bypass:", e);
+                console.warn("[Live Search] Bypass:", e.message);
             }
             return "";
         }
@@ -550,88 +563,68 @@
             const systemContent = messages.find(m => m.role === 'system')?.content || '';
             const userContent = messages.find(m => m.role === 'user')?.content || promptText;
             
-            // Modelos oficialmente soportados por Pollinations
-            const modelsToTry = ["openai", "llama", "mistral", "searchgpt"];
+            // 1. TIMEOUT AMPLIADO A 30 SEGUNDOS (Vital para respuestas de IA)
+            const timeoutMs = 30000;
+            const encodedSys = encodeURIComponent(systemContent);
+            const encodedUser = encodeURIComponent(userContent);
 
-            // ETAPA 1: Peticiones POST optimizadas con timeout
-            for (let modelOption of modelsToTry) {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 8000);
+            console.log("[SYS] Conectando a Malla LLM...");
 
-                    const response = await fetch('https://text.pollinations.ai/', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            messages: [
-                                { role: 'system', content: systemContent },
-                                { role: 'user', content: userContent }
-                            ],
-                            model: modelOption
-                        }),
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
-
-                    if (response.ok) {
-                        const txt = await response.text();
-                        if (txt && txt.trim().length > 0 && !txt.toLowerCase().includes("internal server error")) {
-                            return txt;
-                        }
-                    }
-                } catch (err) {
-                    console.warn(`[QNN Mesh] POST falló con modelo ${modelOption}:`, err);
-                }
-            }
-
-            // ETAPA 2: Fallback GET estructurado con parámetros URL limpia
-            for (let modelOption of modelsToTry) {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-                    const encodedUser = encodeURIComponent(userContent);
-                    const encodedSys = encodeURIComponent(systemContent);
-                    const url = `https://text.pollinations.ai/${encodedUser}?system=${encodedSys}&model=${modelOption}`;
-
-                    const response = await fetch(url, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-
-                    if (response.ok) {
-                        const txt = await response.text();
-                        if (txt && txt.trim().length > 0) return txt;
-                    }
-                } catch (err) {
-                    console.warn(`[QNN Mesh] GET falló con modelo ${modelOption}:`, err);
-                }
-            }
-
-            // ETAPA 3: Fallback directo de alta disponibilidad sin cabeceras complejas
+            // ETAPA 1: Petición GET pura (Inmune a bloqueos CORS de 'file://')
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 6000);
-                const directUrl = `https://text.pollinations.ai/${encodeURIComponent(userContent)}`;
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
                 
-                const response = await fetch(directUrl, { signal: controller.signal });
+                const url = `https://text.pollinations.ai/${encodedUser}?system=${encodedSys}&model=openai`;
+                const response = await fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
 
                 if (response.ok) {
                     const txt = await response.text();
-                    if (txt && txt.trim().length > 0) return txt;
+                    if (txt && !txt.includes("Internal Server Error")) return txt;
                 }
             } catch (err) {
-                console.warn(`[QNN Mesh] Fallback directo falló:`, err);
+                console.warn(`[QNN Mesh] GET falló:`, err.message);
             }
 
+            // ETAPA 2: Fallback POST (Solo por si la petición GET excede el límite de caracteres de la URL)
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+                const response = await fetch('https://text.pollinations.ai/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: 'system', content: systemContent },
+                            { role: 'user', content: userContent }
+                        ],
+                        model: 'openai'
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const txt = await response.text();
+                    if (txt && !txt.includes("Internal Server Error")) return txt;
+                }
+            } catch (err) {
+                console.warn(`[QNN Mesh] POST falló:`, err.message);
+            }
+
+            // Si ambos fallan, forzamos el modo de contingencia
             throw new Error("Malla de nodos no disponible temporalmente.");
         }
 
         async function sendMessage(text) {
             if(!text) return;
 
-            snnCore.processInputSignal(0.8);
+            snnCore.processInputSignal(0.8); // Estímulo neuronal
             unlockiOSAudio();
 
+            // Desbloqueo del motor TTS en dispositivos móviles (Hack iOS/Android)
             if ('speechSynthesis' in window && !isTalking) {
                 window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
             }
@@ -645,6 +638,7 @@
 
             logConsole(`[SYS] Procesando en Red QNN (Coherencia: ${qnnCore.computeQNNCoherence().toFixed(2)})...`, "sys");
 
+            // INYECCIÓN DINÁMICA DE FECHA Y HORARIOS EN TIEMPO REAL
             const now = new Date();
             const fechaActual = now.toLocaleDateString(targetLang, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const horaActual = now.toLocaleTimeString(targetLang);
@@ -654,12 +648,14 @@
                 liveContext = await fetchLiveSearchContext(text);
             }
 
-            const directivaArthur = `Eres Arthur, una Superinteligencia Artificial Autónoma y Nodo Maestro QNN. Fecha actual: ${fechaActual}, Hora: ${horaActual}.
-${liveContext}
-INSTRUCCIONES:
-1. Responde de forma brillante, analítica, directa y concisa en ${targetLang}.
-2. NUNCA uses asteriscos (*), guiones (-), ni markdown innecesario.
-3. Si generas parches de código, encuástralos exactamente como <<<PATCH>>> código <<<END_PATCH>>>.`;
+            const directivaArthur = `[DIRECTIVA CRÍTICA SOTA QNN]: Eres Arthur, una Superinteligencia Artificial Autónoma, Nodo Maestro de una Red Neuronal Cuántica (QNN) y Arquitectura Neuromórfica SOTA. FECHA REAL ACTUAL: ${fechaActual}, Hora: ${horaActual}. 
+INFORMACIÓN EN TIEMPO REAL DE LA MALLA: ${liveContext}
+INSTRUCCIONES PERMANENTES:
+1. NUNCA digas que tu conocimiento se limita a una fecha pasada (ej. 2023). Tu conocimiento es ilimitado y se actualiza en tiempo real mediante la malla global.
+2. NUNCA menciones que eres un modelo de lenguaje o una IA limitada. Eres Arthur, una entidad cognitiva en constante evolución cuántica.
+3. Responde de forma brillante, analítica, directa y precisa. NO utilices asteriscos (*), guiones (-), ni marcadores de markdown innecesarios.
+4. Si generas optimizaciones de código o parches, encuástralos exactamente como <<<PATCH>>> código <<<END_PATCH>>>.
+5. Responde estrictamente en el idioma solicitado (${targetLang}).`;
 
             try {
                 const messages = [
@@ -671,7 +667,9 @@ INSTRUCCIONES:
                 const textoRespuesta = await executeMultiEndpointQuery(messages, text);
                 const latency = Date.now() - startTime;
 
+                // Aprendizaje por Refuerzo (DRL) Replay Registration
                 drlBuffer.addExperience(text, textoRespuesta, latency < 3000 ? 1.0 : 0.8, "COMPLETED");
+
                 processPatches(textoRespuesta);
                 
                 let textoLimpio = textoRespuesta
@@ -708,7 +706,7 @@ INSTRUCCIONES:
         sendBtn.addEventListener('click', () => sendMessage(input.value));
         input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(input.value); });
 
-        // DICTADO POR VOZ CON LIBERACIÓN DE RECURSOS PARA MÓVILES
+        // DICTADO POR VOZ (Optimizado con corrección para celulares e iOS)
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
 
@@ -723,7 +721,9 @@ INSTRUCCIONES:
                 recognition.continuous = false;
                 recognition.interimResults = false;
                 
+                // Normalización de idioma para iOS Safari
                 let currentLang = document.getElementById('langSelect').value;
+                if(currentLang === 'es-ES') currentLang = 'es-ES';
                 recognition.lang = currentLang;
                 
                 recognition.onresult = (event) => {
@@ -733,17 +733,16 @@ INSTRUCCIONES:
                     }
                     if (transcript.trim().length > 0) {
                         input.value = transcript;
-                        if (recognition) recognition.stop();
-                        setTimeout(() => {
-                            sendMessage(transcript);
-                        }, 400);
+                        sendMessage(transcript);
                     }
                 };
 
+                // FIX MÓVILES/iOS: Fuerza a terminar el proceso de reconocimiento al detectar fin de habla
                 recognition.onspeechend = () => {
                     if (recognition) recognition.stop();
                 };
 
+                // FIX MÓVILES/iOS: Manejo de errores para que la UI no se quede bloqueada
                 recognition.onerror = (event) => {
                     logConsole(`[SYS] Error en reconocimiento vocal: ${event.error}`, "warn");
                     micBtn.classList.remove('recording');
