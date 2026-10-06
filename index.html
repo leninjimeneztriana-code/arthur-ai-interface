@@ -1103,5 +1103,102 @@ INSTRUCCIONES PERMANENTES:
             return res.text;
         };
     </script>
+    <!-- ARTHUR MESH v4 FUENTES GLOBALES (BLOQUE ADITIVO): noticias, ciencia, clima, mercados, sismos, web y lectura de URLs, todo en paralelo y con tiempo máximo -->
+    <script>
+        (function () {
+            const YEAR = new Date().getFullYear();
+            const J = (u, ms) => arthurFetch(u, {}, null, ms || 5000).then(r => { if (!r.ok) throw new Error('HTTP'); return r.json(); });
+            const T = (u, ms) => arthurFetch(u, {}, null, ms || 6000).then(r => { if (!r.ok) throw new Error('HTTP'); return r.text(); });
+            const RSS = f => J('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(f)).then(j => (j.items || []).slice(0, 4).map(i => i.title + ' (' + (i.pubDate || '').slice(0, 10) + ')').join(' | '));
+            const host = u => { try { return new URL(u).hostname; } catch (e) { return 'web'; } };
+
+            // Detección multilingüe de la intención de la consulta: solo se consultan las fuentes especializadas que aplican
+            const R = {
+                news: /\bhoy\b|noticia|actual|[uú]ltim|reciente|ayer|semana|news|today|latest|recent|breaking|yesterday|aujourd|actualit|dernier|heute|aktuell|nachricht|hoje|notícia|今日|新闻|新聞|ニュース|最新|сегодня|новост|последн/i,
+                sci: /cienc|cient[ií]f|estudio|investigaci|paper|study|research|scien|c[aá]ncer|vacun|vaccin|cl[ií]nic|f[ií]sica|physics|quantum|cu[aá]ntic|neuro|medic|enfermedad|disease|recherche|étude|studie|forschung|estudo|pesquisa|研究|论文|論文|исследован|научн/i,
+                tech: /\bia\b|\bai\b|inteligencia artificial|artificial intelligence|software|program|código|\bcode\b|github|startup|tecnolog|technolog|\btech\b|\bgpu\b|chip|openai|anthropic|linux|\bios\b|android|ciber|cyber|hack|\bllm\b/i,
+                wx: /clima|tiempo en|temperatura|lluvia|pron[oó]stico|weather|forecast|m[eé]t[eé]o|wetter|previs[aã]o|天气|天気|погод/i,
+                fx: /d[oó]lar|dollar|\beuros?\b|tipo de cambio|cambio de moneda|exchange rate|taux de change|wechselkurs|c[aâ]mbio d|汇率|為替|курс/i,
+                cr: /bitcoin|\bbtc\b|ethereum|\beth\b|solana|cripto|crypto|dogecoin|\bxrp\b|cardano|\bbnb\b/i,
+                eq: /sismo|terremoto|temblor|earthquake|s[eé]isme|erdbeben|地震|землетряс/i
+            };
+            const FEEDS = { es: 'https://feeds.bbci.co.uk/mundo/rss.xml', en: 'https://feeds.bbci.co.uk/news/world/rss.xml', fr: 'https://www.france24.com/fr/rss', de: 'https://rss.dw.com/rdf/rss-de-all', pt: 'https://feeds.bbci.co.uk/portuguese/rss.xml', ru: 'https://feeds.bbci.co.uk/russian/rss.xml', zh: 'https://feeds.bbci.co.uk/zhongwen/simp/rss.xml', ja: 'https://www3.nhk.or.jp/rss/news/cat0.xml' };
+            const COINS = { bitcoin: 'bitcoin', btc: 'bitcoin', ethereum: 'ethereum', eth: 'ethereum', solana: 'solana', dogecoin: 'dogecoin', xrp: 'ripple', cardano: 'cardano', bnb: 'binancecoin' };
+
+            const gn = (q, lang, l2, extra) => { const rg = lang.slice(3) || 'US', ce = l2 === 'zh' ? 'CN:zh-Hans' : rg + ':' + l2; return RSS('https://news.google.com/rss/search?q=' + encodeURIComponent(q + (extra || '')) + '&hl=' + lang + '&gl=' + rg + '&ceid=' + ce); };
+            const wiki = (q, l2) => J(`https://${l2}.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=2&prop=extracts&exintro=1&explaintext=1&exchars=600&format=json&origin=*`)
+                .then(j => Object.values((j.query && j.query.pages) || {}).filter(p => p.extract).sort((a, b) => a.index - b.index).map(p => p.title + ': ' + p.extract).join(' | '));
+            const gdelt = q => J('https://api.gdeltproject.org/api/v2/doc/doc?mode=artlist&maxrecords=5&format=json&sort=datedesc&timespan=7d&query=' + encodeURIComponent(q.replace(/[?¿!¡"]/g, '')), 6000).then(j => (j.articles || []).slice(0, 5).map(a => a.title + ' (' + a.domain + ', ' + (a.seendate || '').slice(0, 8) + ')').join(' | '));
+            const hn = q => J('https://hn.algolia.com/api/v1/search_by_date?tags=story&hitsPerPage=4&query=' + encodeURIComponent(q)).then(j => (j.hits || []).map(h => h.title + ' (' + (h.created_at || '').slice(0, 10) + ', ' + h.points + ' pts)').join(' | '));
+            const sci = q => Promise.all([
+                J('https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=3&resultType=lite&query=' + encodeURIComponent(q.slice(0, 150))).then(j => ((j.resultList && j.resultList.result) || []).map(x => x.title + ' (' + (x.journalTitle || 'preprint') + ', ' + (x.pubYear || '') + ')').join(' | ')).catch(() => ''),
+                J('https://api.openalex.org/works?per-page=3&filter=from_publication_date:' + (YEAR - 2) + '-01-01&search=' + encodeURIComponent(q.slice(0, 150))).then(j => (j.results || []).map(x => x.display_name + ' (' + x.publication_year + ', cited ' + x.cited_by_count + ')').join(' | ')).catch(() => '')
+            ]).then(r => [r[0] && 'Europe PMC: ' + r[0], r[1] && 'OpenAlex: ' + r[1]].filter(Boolean).join(' || '));
+            const fx = () => J('https://open.er-api.com/v6/latest/USD').then(j => { const r = j.rates || {}; return '1 USD = ' + ['EUR', 'GBP', 'JPY', 'CNY', 'COP', 'MXN', 'BRL', 'ARS', 'CLP'].filter(k => r[k]).map(k => r[k].toFixed(r[k] < 10 ? 4 : 2) + ' ' + k).join(', ') + ' (updated ' + (j.time_last_update_utc || '').slice(0, 16) + ' UTC)'; });
+            const cr = q => {
+                const ids = Array.from(new Set((q.toLowerCase().match(/[a-z]+/g) || []).map(w => COINS[w]).filter(Boolean)));
+                if (!ids.length) ids.push('bitcoin', 'ethereum');
+                return J('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd,eur&include_24hr_change=true&ids=' + ids.join(',')).then(j => Object.keys(j).map(k => k + ': ' + j[k].usd + ' USD / ' + j[k].eur + ' EUR (24h ' + (j[k].usd_24h_change || 0).toFixed(1) + '%)').join(' | '));
+            };
+            const eq = () => J('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson').then(j => (j.features || []).slice(0, 5).map(f => 'M' + f.properties.mag + ' ' + f.properties.place + ' (' + new Date(f.properties.time).toISOString().slice(0, 16) + 'Z)').join(' | '));
+            const wx = (q, l2) => {
+                const m = q.match(/(?:^|\s)(?:en|in|à|em|at|de|for|para|а|в)\s+([^?.,;!\d]{2,40})/gi);
+                let place = m ? m[m.length - 1].trim().replace(/^\S+\s+/, '') : '';
+                place = place.replace(/\b(hoy|ahora|ma[nñ]ana|today|now|tomorrow|aujourd.*|heute|hoje|сегодня|сейчас)\b.*$/i, '').trim();
+                if (!place) return Promise.resolve('');
+                return J('https://geocoding-api.open-meteo.com/v1/search?count=1&language=' + l2 + '&name=' + encodeURIComponent(place)).then(g => {
+                    const p = g.results && g.results[0]; if (!p) return '';
+                    return J('https://api.open-meteo.com/v1/forecast?latitude=' + p.latitude + '&longitude=' + p.longitude + '&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=2&timezone=auto').then(w => {
+                        const c = w.current, d = w.daily;
+                        return p.name + (p.country ? ', ' + p.country : '') + ': now ' + c.temperature_2m + '°C (feels ' + c.apparent_temperature + '°C), humidity ' + c.relative_humidity_2m + '%, wind ' + c.wind_speed_10m + ' km/h, precip ' + c.precipitation + ' mm; today max ' + d.temperature_2m_max[0] + '°C min ' + d.temperature_2m_min[0] + '°C rain prob ' + d.precipitation_probability_max[0] + '%; tomorrow max ' + d.temperature_2m_max[1] + '°C min ' + d.temperature_2m_min[1] + '°C';
+                    });
+                });
+            };
+            // Búsqueda web general: DuckDuckGo Lite leído mediante Jina Reader (público, con CORS). Google Search directo no es accesible desde un navegador.
+            const web = q => T('https://r.jina.ai/https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(q.slice(0, 200)), 6000)
+                .then(t => t.replace(/^[\s\S]*?Markdown Content:/, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/https?:\/\/\S+/g, '').replace(/\s+/g, ' ').trim());
+
+            // Reemplaza la agregación de fuentes de v3 (misma firma: la consumen executeMultiEndpointQuery y arthurDigest)
+            arthurSources = function (query) {
+                const lang = document.getElementById('langSelect').value || 'es-ES', l2 = lang.slice(0, 2), key = 'S4|' + lang + '|' + query.toLowerCase().trim();
+                const hit = ARTHUR_MESH.cache.get(key);
+                if (hit && Date.now() - hit.t < 300000) return hit.p;
+                const q = query.slice(0, 200), f = {}, jobs = [], res = [], urls = (q.match(/https?:\/\/[^\s<>"')]+/g) || []).slice(0, 2);
+                Object.keys(R).forEach(k => { f[k] = R[k].test(q); });
+                const add = (name, p, lim) => { const i = jobs.length; jobs.push(Promise.resolve(p).then(t => { if (t) res[i] = { name: name, text: String(t).slice(0, lim || 700) }; }).catch(() => {})); };
+                urls.forEach(u => add('Page ' + host(u), T('https://r.jina.ai/' + u, 9000).then(t => t.replace(/\s+/g, ' ')), 2500));
+                if (f.wx) add('Open-Meteo', wx(q, l2));
+                if (f.fx) add('ExchangeRate-API', fx());
+                if (f.cr) add('CoinGecko', cr(q));
+                if (f.eq) add('USGS', eq());
+                add('Google News', gn(q, lang, l2, f.news ? ' when:7d' : ''));
+                if (f.news) { add('GDELT', gdelt(q)); add('Headlines', RSS(FEEDS[l2] || FEEDS.en)); }
+                if (f.sci) add('Science', sci(q), 900);
+                if (f.tech) add('Hacker News', hn(q));
+                add('Wikipedia', wiki(q, l2), 1100);
+                add('Web', web(q), 800);
+                add('DuckDuckGo', arthurCap(Promise.resolve(arthurLegacyLive(query)), 4000).then(t => String(t || '').replace('[CONTEXTO WEB EN VIVO EN TIEMPO REAL]: ', '')), 500);
+                const p = Promise.race([Promise.all(jobs), arthurSleep(urls.length ? 9500 : 5200)]).then(() => {
+                    const all = res.filter(Boolean), by = n => (all.filter(e => e.name === n)[0] || {}).text || '';
+                    if (!all.length) ARTHUR_MESH.cache.delete(key);
+                    return { all: all, wiki: by('Wikipedia'), news: by('Google News'), web: by('Web') };
+                });
+                ARTHUR_MESH.cache.set(key, { t: Date.now(), p: p });
+                return p;
+            };
+
+            fetchLiveSearchContext = async function (query) {
+                const s = await arthurSources(query);
+                const t = (s.all || []).map(e => '[' + e.name + '] ' + e.text).join(' || ').slice(0, 3400);
+                return t ? '[CONTEXTO WEB EN VIVO EN TIEMPO REAL]: ' + t : '';
+            };
+
+            arthurDigest = function (s, lang) {
+                const L = { es: 'Con base en fuentes en línea:', en: 'Based on online sources:', fr: "D'après des sources en ligne :", de: 'Laut Online-Quellen:', zh: '根据在线资料：', pt: 'Com base em fontes online:', ja: 'オンライン情報によると：', ru: 'По данным онлайн-источников:' };
+                const parts = (s.all || []).slice(0, 3).map(e => e.text.slice(0, 450) + ' (' + e.name + ')');
+                return parts.length ? (L[lang.slice(0, 2)] || L.en) + ' ' + parts.join(' ') : '';
+            };
+        })();
+    </script>
 </body>
 </html>
