@@ -977,5 +977,131 @@ INSTRUCCIONES PERMANENTES:
             speak(greetingText, currentLang);
         });
     </script>
+    <!-- ARTHUR MESH v3 MÓVIL (BLOQUE ADITIVO): iOS/Android, tabletas, límites de IP móvil, tiempos máximos y respaldo con fuentes reales -->
+    <script>
+        // Opcional: pega aquí tus claves GRATUITAS (Groq: console.groq.com | Gemini: aistudio.google.com) para máxima velocidad.
+        // También se leen de localStorage: arthur_groq_key / arthur_gemini_key. Vacías = solo modelos sin clave.
+        const ARTHUR_FREE_KEYS = { groq: '', gemini: '' };
+        const ARTHUR_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        ARTHUR_MESH.totalMs = 14000; ARTHUR_MESH.reqMs = 12000;
+        if (ARTHUR_MOBILE) { ARTHUR_MESH.hedgeMs = 1500; ARTHUR_MESH.usePuter = false; } // Puter abre un popup que iOS/Android bloquean
+
+        const arthurSleep = ms => new Promise(r => setTimeout(r, ms));
+        const arthurCap = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error('timeout')), ms))]);
+
+        async function arthurCall3(url, model, msgs, signal, hdr, lite) {
+            const body = { model: model, messages: msgs };
+            if (!lite) body.max_tokens = 1200; // sin temperature: varios modelos nuevos la rechazan
+            const r = await arthurFetch(url, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, hdr || {}), body: JSON.stringify(body) }, signal);
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const raw = await r.text(); let t = raw;
+            try {
+                const j = JSON.parse(raw), c = j.choices && j.choices[0], m = c && c.message;
+                let x = c ? ((m && m.content) || c.text || '') : '';
+                t = Array.isArray(x) ? x.map(p => p.text || '').join('') : x;
+            } catch (e) {}
+            t = arthurClean(t);
+            if (!t) throw new Error('vacío');
+            return t;
+        }
+
+        // GET "simple" (sin preflight CORS): el más compatible con Safari/redes móviles. Sistema compacto que conserva idioma y contexto en vivo.
+        function arthurGetPoll(model, msgs, signal) {
+            const lang = document.getElementById('langSelect').value;
+            const m = /INFORMACIÓN EN TIEMPO REAL DE LA MALLA: ([\s\S]*?)\nINSTRUCCIONES/.exec(msgs[0].content);
+            const hist = msgs.slice(1, -1).slice(-4).map(h => (h.role === 'user' ? 'U: ' : 'A: ') + h.content.slice(0, 200)).join(' | ');
+            const sys = 'Eres Arthur, asistente analítico, directo y preciso. Fecha y hora actual: ' + new Date().toLocaleString(lang) + '. Responde estrictamente en el idioma ' + lang + ', sin markdown, sin asteriscos ni guiones. Si un dato no está en el contexto, dilo sin inventar. ' + (m && m[1].trim() ? 'Contexto en vivo: ' + m[1].slice(0, 1200) + ' ' : '') + (hist ? 'Historial: ' + hist : '');
+            const url = 'https://text.pollinations.ai/' + encodeURIComponent(msgs[msgs.length - 1].content.slice(0, 600)) + '?model=' + model + '&system=' + encodeURIComponent(sys);
+            return arthurFetch(url, {}, signal).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+                .then(t => { t = arthurClean(t); if (!t) throw new Error('vacío'); return t; });
+        }
+
+        function arthurCandidates3(msgs) {
+            const P = 'https://text.pollinations.ai/openai', ls = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+            const groq = ARTHUR_FREE_KEYS.groq || ls('arthur_groq_key'), gem = ARTHUR_FREE_KEYS.gemini || ls('arthur_gemini_key');
+            const pref = [/gpt-?5|gpt-?4\.1|gpt-?4o|gpt-?4/i, /llama.*(3\.3|70|4)/i, /qwen/i, /mistral|mixtral/i, /deepseek/i, /gemma/i, /llama/i];
+            const lz = (key, base, hdr, fb, i, pf) => ({ name: key + '#' + i, run: async s => {
+                const m = await arthurModels(key, base, hdr, pf || pref, fb);
+                if (!m[i]) throw new Error('sin modelo');
+                return arthurCall3(base + '/chat/completions', m[i], msgs, s, hdr, false);
+            }});
+            const L7 = { Authorization: 'Bearer unused' }, c = [];
+            if (groq) c.push(lz('groq', 'https://api.groq.com/openai/v1', { Authorization: 'Bearer ' + groq }, ['llama-3.3-70b-versatile'], 0, [/llama.*3\.3.*70b/i, /gpt-oss/i, /llama/i]));
+            if (gem) c.push(lz('gemini', 'https://generativelanguage.googleapis.com/v1beta/openai', { Authorization: 'Bearer ' + gem }, ['gemini-2.5-flash'], 0, [/gemini.*flash(?!.*(lite|image|tts))/i, /gemini/i]));
+            return c.concat([
+                { name: 'poll-get:openai-fast', run: s => arthurGetPoll('openai-fast', msgs, s) },
+                lz('llm7', 'https://api.llm7.io/v1', L7, ['gpt-4o-mini', 'default'], 0),
+                lz('ovh', 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1', {}, ['Meta-Llama-3_3-70B-Instruct'], 0),
+                { name: 'poll-post:openai-fast', run: s => arthurCall3(P, 'openai-fast', msgs, s, null, true) },
+                lz('llm7', 'https://api.llm7.io/v1', L7, ['gpt-4o-mini', 'default'], 1),
+                { name: 'poll-get:mistral', run: s => arthurGetPoll('mistral', msgs, s) },
+                { name: 'poll-post:openai', run: s => arthurCall3(P, 'openai', msgs, s, null, true) },
+                { name: 'poll-get:openai', run: s => arthurGetPoll('openai', msgs, s) }
+            ]);
+        }
+
+        // Fuentes reales en paralelo (Wikipedia + noticias + búsqueda original), cada una con tiempo máximo; memoizadas 5 min
+        function arthurSources(query) {
+            const lang = document.getElementById('langSelect').value || 'es-ES', l2 = lang.slice(0, 2), key = lang + '|' + query.toLowerCase().trim();
+            const hit = ARTHUR_MESH.cache.get('s|' + key);
+            if (hit && Date.now() - hit.t < 300000) return hit.p;
+            const q = encodeURIComponent(query.slice(0, 200));
+            const wiki = arthurFetch(`https://${l2}.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${q}&gsrlimit=2&prop=extracts&exintro=1&explaintext=1&exchars=700&format=json&origin=*`, {}, null, 5000)
+                .then(r => r.json()).then(j => Object.values((j.query && j.query.pages) || {}).filter(p => p.extract).sort((a, b) => a.index - b.index).map(p => p.title + ': ' + p.extract).join(' | ')).catch(() => '');
+            const news = arthurFetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(`https://news.google.com/rss/search?q=${q}&hl=${l2}`), {}, null, 5000)
+                .then(r => r.json()).then(j => (j.items || []).slice(0, 4).map(i => i.title + ' (' + (i.pubDate || '').slice(0, 10) + ')').join(' | ')).catch(() => '');
+            const web = arthurCap(Promise.resolve(arthurLegacyLive(query)), 4000).catch(() => '');
+            const p = Promise.all([wiki, news, web]).then(r => {
+                const s = { wiki: r[0] || '', news: r[1] || '', web: String(r[2] || '').replace('[CONTEXTO WEB EN VIVO EN TIEMPO REAL]: ', '') };
+                if (!s.wiki && !s.news && !s.web) ARTHUR_MESH.cache.delete('s|' + key);
+                return s;
+            });
+            ARTHUR_MESH.cache.set('s|' + key, { t: Date.now(), p: p });
+            return p;
+        }
+
+        fetchLiveSearchContext = async function (query) {
+            const s = await arthurSources(query), parts = [];
+            if (s.news) parts.push('Titulares recientes: ' + s.news);
+            if (s.wiki) parts.push('Enciclopedia: ' + s.wiki);
+            if (s.web) parts.push('Búsqueda web: ' + s.web);
+            return parts.length ? '[CONTEXTO WEB EN VIVO EN TIEMPO REAL]: ' + parts.join(' || ').slice(0, 2400) : '';
+        };
+
+        // Si ningún modelo responde, Arthur contesta con las fuentes reales (en el idioma elegido) en vez de un mensaje vacío
+        function arthurDigest(s, lang) {
+            const L = { es: 'Con base en fuentes en línea:', en: 'Based on online sources:', fr: "D'après des sources en ligne :", de: 'Laut Online-Quellen:', zh: '根据在线资料：', pt: 'Com base em fontes online:', ja: 'オンライン情報によると：', ru: 'По данным онлайн-источников:' };
+            const parts = [];
+            if (s.wiki) parts.push(s.wiki.split(' | ')[0].slice(0, 700));
+            if (s.news) parts.push(s.news.split(' | ').slice(0, 3).join('. '));
+            if (!parts.length && s.web) parts.push(s.web.slice(0, 600));
+            return parts.length ? (L[lang.slice(0, 2)] || L.en) + ' ' + parts.join(' ') : '';
+        }
+
+        executeMultiEndpointQuery = async function (messages, promptText) {
+            const lang = document.getElementById('langSelect').value;
+            if (ARTHUR_MESH.histLang !== lang) { ARTHUR_MESH.history = []; ARTHUR_MESH.histLang = lang; }
+            const userText = messages[messages.length - 1].content;
+            const sys = { role: 'system', content: messages[0].content + '\n[PROTOCOLO COGNITIVO v2]: Razona paso a paso internamente antes de responder, verifica la coherencia de cifras y fechas, prioriza el CONTEXTO WEB EN VIVO cuando exista y menciona el medio o fuente al usarlo. Si un dato reciente no aparece en ese contexto, dilo con honestidad en lugar de inventarlo. Mantén la continuidad con la conversación previa. Responde siempre en el idioma solicitado.' };
+            const msgs = [sys].concat(ARTHUR_MESH.history, [{ role: 'user', content: userText }]);
+            const t0 = Date.now(); let res = null;
+            for (let i = 0; i < 2 && !res; i++) { // un reintento si el fallo fue rápido (límite por IP compartida de datos móviles, red que despierta)
+                try { res = await arthurRace(arthurCandidates3(msgs)); }
+                catch (e) { if (Date.now() - t0 > 7000) break; await arthurSleep(2200); }
+            }
+            if (!res && ARTHUR_MESH.usePuter && Date.now() >= ARTHUR_MESH.puterOffUntil) { try { res = { text: await arthurPuter(msgs), via: 'puter' }; } catch (e) {} }
+            if (!res) { try { res = { text: await arthurCap(arthurLegacyMesh(messages, promptText), 12000), via: 'legacy' }; } catch (e) {} }
+            if (!res) {
+                const s = await arthurSources(userText).catch(() => null), d = s ? arthurDigest(s, lang) : '';
+                if (d) return d;
+                throw new Error('Sin conexión a la malla');
+            }
+            const h = ARTHUR_MESH.history;
+            h.push({ role: 'user', content: userText.slice(0, 800) }, { role: 'assistant', content: res.text.replace(/<<<PATCH>>>[\s\S]*?<<<END_PATCH>>>/g, '').slice(0, 1000) });
+            while (h.length > 8 || JSON.stringify(h).length > 5000) h.splice(0, 2);
+            console.info('[ARTHUR-MESH v3] respondió:', res.via);
+            return res.text;
+        };
+    </script>
 </body>
 </html>
