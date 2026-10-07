@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Arthur Omni Core - Web OS SOTA</title>
+    <!-- Actualizado el icono de la pestaña del navegador al del repositorio -->
+    <link rel="icon" href="logo_arthur.ico" type="image/x-icon">
+    <style>
+        :root { 
+            --bg-color: #050a12; 
+            --accent-color: #00e5ff; 
+            --glow: 0 0 15px rgba(0, 229, 255, 0.6);
+            --text-color: #e0f7fa; 
+            --warn-color: #ffaa00;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+    <title>Arthur Omni Core - Web OS SOTA</title>
+    <!-- Actualizado el icono de la pestaña del navegador al del repositorio -->
     <link rel="icon" href="logo_arthur.ico" type="image/x-icon">
     <style>
         :root { 
@@ -20,32 +35,14 @@
             background-image: radial-gradient(circle at 50% 50%, #0a192f 0%, #050a12 80%);
         }
         
-        /* PANTALLA DE INICIALIZACIÓN DIVIDIDA EN DOS */
+        /* PANTALLA DE INICIALIZACIÓN */
         #bootScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: row;
-            transition: opacity 0.8s ease;
+            background: #000; z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; transition: opacity 0.8s ease;
         }
         
-        .split-side {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        #trialSide {
-            border-right: 1px solid rgba(0, 229, 255, 0.2);
-            background: radial-gradient(circle at right, rgba(0, 229, 255, 0.05) 0%, transparent 70%);
-        }
-        #premiumSide {
-            background: radial-gradient(circle at left, rgba(255, 170, 0, 0.05) 0%, transparent 70%);
-        }
-
+        /* LOGO SOBRE ESFERA NEON */
         .boot-logo {
             width: 140px; height: 140px; margin-bottom: 40px;
             border-radius: 50%; 
@@ -57,28 +54,12 @@
         }
         .boot-btn {
             padding: 20px 40px; 
-            min-width: 280px; font-size: 16px; color: var(--accent-color);
-            background: rgba(0, 15, 25, 0.8); border: 1px solid var(--accent-color);
+            min-width: 280px; font-size: 18px; color: var(--accent-color);
+            background: rgba(0, 15, 25, 0.8); border: 2px solid var(--accent-color);
             border-radius: 8px; cursor: pointer; box-shadow: var(--glow); text-transform: uppercase;
-            letter-spacing: 2px; transition: 0.3s; text-align: center; font-weight: bold;
-            margin-bottom: 15px;
+            letter-spacing: 3px; transition: 0.3s; text-align: center;
         }
         .boot-btn:hover { background: var(--accent-color); color: #000; }
-
-        .premium-btn {
-            color: #ffaa00;
-            border-color: #ffaa00;
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.4);
-        }
-        .premium-btn:hover { background: #ffaa00; color: #000; }
-        
-        .login-google {
-            background: #fff; color: #333; display: flex; align-items: center; justify-content: center; gap: 10px;
-            border: none; padding: 15px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 20px;
-            min-width: 280px; font-size: 14px;
-        }
-        
-        .subs-info { font-size: 12px; color: #aaa; max-width: 300px; line-height: 1.4; margin-bottom: 20px;}
 
         /* HUD HEADER */
         .header {
@@ -89,11 +70,15 @@
         }
         .logo-container { display: flex; align-items: center; gap: 12px; }
         
+        /* LOGO HEADER SOBRE ESFERA NEON */
         .logo-container img { 
-            width: 45px; height: 45px; border-radius: 50%; 
-            border: 1px solid var(--accent-color); box-shadow: var(--glow); 
+            width: 45px; height: 45px; 
+            border-radius: 50%; 
+            border: 1px solid var(--accent-color); 
+            box-shadow: var(--glow); 
             background: radial-gradient(circle, #00e5ff 0%, #005566 100%);
-            object-fit: contain; padding: 2px;
+            object-fit: contain;
+            padding: 2px;
         }
         .logo-title { font-size: 18px; font-weight: bold; color: var(--accent-color); letter-spacing: 2px; }
         
@@ -102,6 +87,7 @@
             padding: 8px 12px; border-radius: 4px; outline: none; font-size: 14px; text-transform: uppercase;
         }
 
+        /* TELEMETRÍA NEUROMÓRFICA */
         .telemetry-hud {
             display: flex; gap: 15px; font-size: 11px; color: var(--accent-color);
             background: rgba(0, 20, 30, 0.5); padding: 5px 10px; border-radius: 4px;
@@ -114,40 +100,63 @@
             display: flex; flex: 1; overflow: hidden; flex-direction: row; position: relative;
         }
         
+        /* AJUSTE RESPONSIVE OPTIMIZADO PARA MÓVILES */
         @media (max-width: 768px) { 
-            #bootScreen { flex-direction: column; }
-            #trialSide { border-right: none; border-bottom: 1px solid rgba(0, 229, 255, 0.2); }
             .main-content { flex-direction: column; overflow: hidden; } 
-            .holo-container { flex: 0 0 28vh; min-height: 160px; width: 100%; border-right: none; border-bottom: 1px solid rgba(0, 229, 255, 0.2); }
-            .console-container { flex: 1; }
-            .input-area { padding: 10px; gap: 8px; flex-wrap: wrap; }
-            .input-area input[type="text"] { flex: 1 1 100%; order: -1; margin-bottom: 2px; }
+            .holo-container { 
+                flex: 0 0 28vh; 
+                min-height: 160px; 
+                width: 100%; 
+                border-right: none; 
+                border-bottom: 1px solid rgba(0, 229, 255, 0.2); 
+            }
+            .console-container {
+                flex: 1;
+            }
+            .input-area {
+                padding: 10px;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .input-area input[type="text"] {
+                flex: 1 1 100%;
+                order: -1;
+                margin-bottom: 2px;
+            }
         }
 
-        /* WIDGET HOLOGRAMA 3D & RECURSOS VISUALES */
+        /* WIDGET HOLOGRAMA 3D */
         .holo-container {
             flex: 1; display: flex; justify-content: center; align-items: center; position: relative;
-            border-right: 1px solid rgba(0, 229, 255, 0.2); overflow: hidden;
+            border-right: 1px solid rgba(0, 229, 255, 0.2);
+            overflow: hidden; /* Asegura que la imagen generada no desborde el área */
         }
+        
+        /* NUEVO: CAPA DE VISUALIZACIÓN GENERATIVA (FONDO) */
+        .visual-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Detrás del canvas y del HUD */
+            object-fit: cover;
+            opacity: 0.35; /* Opacidad sutil para mantener el protagonismo del modelo 3D */
+            mix-blend-mode: screen; /* Fusión de color para mantener la estética ciberpunk */
+            transition: opacity 1s ease-in-out, filter 1s ease-in-out;
+            filter: blur(2px) contrast(1.2);
+        }
+
         .hud-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><circle cx="50%" cy="50%" r="45%" stroke="%2300e5ff" stroke-width="0.5" fill="none" stroke-dasharray="4 8" opacity="0.3"/></svg>');
-            pointer-events: none; z-index: 1;
+            pointer-events: none;
+            z-index: 3; /* Aseguramos que se mantenga por encima de la ilustración */
         }
         canvas { 
-            width: 100%; max-width: 450px; height: 100%; max-height: 450px; z-index: 3; 
-            object-fit: contain; position: relative;
-        }
-        /* Contenedor para imágenes autogenerativas detrás del holograma */
-        #visualResources {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 1s ease; z-index: 2; pointer-events: none;
-        }
-        #visualResources img {
-            max-width: 80%; max-height: 80%; object-fit: cover; border-radius: 10px;
-            box-shadow: 0 0 30px rgba(0,229,255,0.4); filter: grayscale(50%) contrast(120%) brightness(80%);
-            mix-blend-mode: screen;
+            width: 100%; max-width: 450px; height: 100%; max-height: 450px; z-index: 2; 
+            object-fit: contain;
+            position: relative;
         }
 
         /* CONSOLA NEUROMÓRFICA Y CHAT */
@@ -170,12 +179,15 @@
             padding: 20px; background: rgba(0, 15, 25, 0.9); display: flex; gap: 12px; align-items: center;
             border-top: 1px solid var(--accent-color); box-shadow: 0 -5px 15px rgba(0, 229, 255, 0.1); z-index: 10;
         }
-        .ext-search-toggle { display: flex; align-items: center; gap: 5px; color: var(--accent-color); font-size: 12px; cursor: pointer; }
+        .ext-search-toggle {
+            display: flex; align-items: center; gap: 5px; color: var(--accent-color); font-size: 12px; cursor: pointer;
+        }
         .ext-search-toggle input { cursor: pointer; }
         
         input[type="text"] {
             flex: 1; padding: 15px; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.4);
-            background: rgba(0, 0, 0, 0.6); color: #fff; outline: none; font-size: 16px; box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
+            background: rgba(0, 0, 0, 0.6); color: #fff; outline: none; font-size: 16px;
+            box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
         }
         input[type="text"]:focus { border-color: var(--accent-color); box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.3); }
         button {
@@ -183,8 +195,7 @@
             background-color: rgba(0, 42, 64, 0.8); color: var(--accent-color); font-size: 20px; cursor: pointer;
             display: flex; justify-content: center; align-items: center; transition: all 0.3s ease;
         }
-        button:hover:not(:disabled) { background-color: var(--accent-color); color: #000; box-shadow: var(--glow); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; border-color: #555; color: #555;}
+        button:hover { background-color: var(--accent-color); color: #000; box-shadow: var(--glow); }
         .mic-btn.recording { background-color: #ff0055; border-color: #ff0055; color: white; animation: pulse 1.5s infinite; box-shadow: 0 0 20px #ff0055; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
@@ -192,58 +203,54 @@
 <body>
 
     <div id="bootScreen">
-        <!-- ZONA IZQUIERDA: TRIAL -->
-        <div class="split-side" id="trialSide">
-            <img src="icon.png" alt="Arthur Logo" class="boot-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
-            <h2 style="margin-bottom: 20px; color: var(--text-color);">Modo Evaluación</h2>
-            <p class="subs-info">Acceso limitado a la arquitectura SOTA. Restringido a 5 interacciones.</p>
-            <button class="boot-btn" id="startTrialBtn">Iniciar Demo (5 Preguntas)</button>
-        </div>
-
-        <!-- ZONA DERECHA: COMERCIAL / SUSCRIPCIÓN -->
-        <div class="split-side" id="premiumSide">
-            <h2 style="margin-bottom: 20px; color: #ffaa00;">Suscripción Profesional</h2>
-            <p class="subs-info">Acceso ilimitado a QNN, memoria persistente, y capacidades completas de embodied AI.</p>
-            
-            <button class="login-google" id="googleLoginBtn">
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
-                Continuar con Google
-            </button>
-            <button class="boot-btn premium-btn" id="payBtn" style="display:none;">Pagar Suscripción ($9.99/mes)</button>
-            <button class="boot-btn premium-btn" id="startPremiumBtn" style="display:none;">Inicializar Omni Core Ilimitado</button>
-        </div>
+        <!-- Actualizado a icon.png -->
+        <img src="icon.png" alt="Arthur Logo" class="boot-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
+        <button class="boot-btn" id="startSystemBtn">Initialize Omni Core</button>
     </div>
 
     <div class="header">
         <div class="logo-container">
+            <!-- Actualizado a icon.png -->
             <img src="icon.png" alt="A° Core" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
             <h3 class="logo-title">A° OMNI CORE</h3>
         </div>
         
         <div class="telemetry-hud">
-            <div class="telemetry-item">Modo: <span id="license-state">TRIAL</span></div>
             <div class="telemetry-item">QNN: <span id="qnn-state">1.00</span></div>
             <div class="telemetry-item">Spikes: <span id="spike-state">0.0%</span></div>
+            <div class="telemetry-item">Buffer: <span id="mem-state">0 exp</span></div>
         </div>
 
         <select id="langSelect" class="lang-select">
             <option value="es-ES">Español</option>
             <option value="en-US">English</option>
+            <option value="fr-FR">Français</option>
+            <option value="de-DE">Deutsch</option>
+            <option value="zh-CN">中文 (Chinese)</option>
+            <option value="pt-BR">Português</option>
+            <option value="ja-JP">日本語 (Japanese)</option>
+            <option value="ru-RU">Русский (Russian)</option>
         </select>
     </div>
 
     <div class="main-content">
         <div class="holo-container">
+            <!-- NUEVO: Elemento de imagen para la proyección visual dinámica en segundo plano -->
+            <!-- Inicialmente transparente, será inyectado con base64 o URL por el core de Python -->
+            <img id="bgVisualizer" class="visual-backdrop" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Visualización autogenerada">
+            
             <div class="hud-overlay"></div>
-            <!-- Nuevo contenedor para recursos visuales auto-generativos -->
-            <div id="visualResources"></div>
             <canvas id="holoCanvas" width="450" height="450"></canvas>
         </div>
 
         <div class="console-container" id="consoleOutput">
             <div class="msg-sys">[SYS] Inicializando QNN Virtual Environment... OK</div>
-            <div class="msg-sys">[SYS] Motor de renderizado holográfico dinámico... ONLINE</div>
+            <div class="msg-sys">[SYS] Motor de renderizado holográfico... ONLINE</div>
             <div class="msg-sys">[SYS] Módulos de procesamiento multilingüe SOTA... ACTIVOS</div>
+            <div class="msg-sys">[SYS] Subsistemas de Auto-Reparación (QEC)... ACTIVOS</div>
+            <div class="msg-sys">[SYS] Malla Neuronal Libre (Open LLM Mesh)... ONLINE</div>
+            <!-- Nuevo mensaje de sistema sobre el motor generativo -->
+            <div class="msg-sys">[SYS] Motor de Ilustración Generativa... EN ESPERA</div>
         </div>
     </div>
 
@@ -257,256 +264,305 @@
         <button id="sendBtn">➤</button>
     </div>
 
-    <!-- SCRIPT DE LOGICA CORE, SUSCRIPCION, HOLOGRAMA DINÁMICO Y MESH -->
+    <!-- LOGOS INCRUSTADOS (BLOQUE ADITIVO): el logo de icon.png va dentro del archivo, así se ve aunque icon.png no esté junto al HTML -->
     <script>
-        const ARTHUR_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%2300e5ff'><circle cx='50' cy='50' r='50'/></svg>";
+        (function () {
+            const ARTHUR_LOGO = "data:image/png;base64,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";
+        })();
         
-        // ESTADO DE LICENCIA
-        let isPremium = false;
-        let trialQuestions = 0;
-        const MAX_TRIAL = 5;
-
-        // LÓGICA PANTALLA DE INICIO (SPLIT SCREEN)
-        document.getElementById('startTrialBtn').addEventListener('click', () => {
-            isPremium = false;
-            document.getElementById('license-state').innerText = "TRIAL (" + MAX_TRIAL + " restantes)";
-            document.getElementById('license-state').style.color = "var(--text-color)";
-            initSystem();
-        });
-
-        // Simulación pasarela Google -> Pago -> Premium
-        document.getElementById('googleLoginBtn').addEventListener('click', () => {
-            document.getElementById('googleLoginBtn').style.display = 'none';
-            document.getElementById('payBtn').style.display = 'block';
-            alert("Autenticación con Google completada (Simulación Firebase Auth).");
-        });
-
-        document.getElementById('payBtn').addEventListener('click', () => {
-            document.getElementById('payBtn').style.display = 'none';
-            document.getElementById('startPremiumBtn').style.display = 'block';
-            alert("Pago procesado exitosamente vía Lemon Squeezy/Stripe (Simulación). Acceso ilimitado concedido.");
-        });
-
-        document.getElementById('startPremiumBtn').addEventListener('click', () => {
-            isPremium = true;
-            document.getElementById('license-state').innerText = "PRO ILIMITADO";
-            document.getElementById('license-state').style.color = "#ffaa00";
-            initSystem();
-        });
-
-        function initSystem() {
-            unlockiOSAudio();
-            document.getElementById('bootScreen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('bootScreen').style.display = 'none';
-                window.speechSynthesis.getVoices();
-                const greetingText = "Sistemas neurológicos en línea. Soy Arthur. ¿Qué haremos hoy?";
-                logConsole(greetingText, "arthur");
-                speak(greetingText, 'es-ES');
-            }, 800);
-        }
-
-        const consoleOutput = document.getElementById('consoleOutput');
-        let timeStep = 0, isTalking = false;
-
-        function logConsole(text, type="sys") {
-            const div = document.createElement('div');
-            div.className = `msg-${type}`;
-            div.innerHTML = text;
-            consoleOutput.appendChild(div);
-            consoleOutput.scrollTop = consoleOutput.scrollHeight;
-        }
-
-        // MOTOR TTS Y SINCRONIZACIÓN VOCAL
-        let targetApertura = 0;
-        let currentApertura = 0;
-        let dispersionFactor = 0; // Para el efecto visual mientras habla
-
-        function unlockiOSAudio() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.resume();
-                const silentUtterance = new SpeechSynthesisUtterance('');
-                silentUtterance.volume = 0.01;
-                window.speechSynthesis.speak(silentUtterance);
-            }
-        }
-        window.addEventListener('touchstart', unlockiOSAudio, { once: true });
-        window.addEventListener('click', unlockiOSAudio, { once: true });
-
-        function speak(text, forceLang = null) {
-            const cleanText = text.replace(/<<<(PATCH|CMD|PYTHON)>>>[\s\S]*?<<<END_\1>>>/g, '').trim();
-            if(!cleanText) return;
-
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = forceLang || document.getElementById('langSelect').value;
-            
-            utterance.onstart = () => { isTalking = true; showVisualResource(cleanText); };
-            utterance.onboundary = (event) => {
-                if (event.name === 'word') {
-                    targetApertura = 6 + Math.random() * 6; 
-                    setTimeout(() => { targetApertura = 1 + Math.random() * 2; }, 150);
-                }
-            };
-            
-            utterance.onend = () => { isTalking = false; targetApertura = 0; hideVisualResource(); };
-            utterance.onerror = () => { isTalking = false; targetApertura = 0; hideVisualResource(); };
-            
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // RECURSOS VISUALES AUTOGENERATIVOS (Point 8)
-        function showVisualResource(text) {
-            const visualDiv = document.getElementById('visualResources');
-            // Extraer palabras clave básicas del texto
-            const words = text.split(" ").filter(w => w.length > 5);
-            let keyword = words.length > 0 ? words[Math.floor(Math.random() * words.length)] : "technology";
-            
-            // Usar pollinations para ilustración de apoyo (auto-generativa en tiempo real)
-            visualDiv.innerHTML = `<img src="https://image.pollinations.ai/prompt/cyberpunk%20wireframe%20hologram%20concept%20${encodeURIComponent(keyword)}?width=600&height=400&nologo=true" alt="Recurso visual">`;
-            visualDiv.style.opacity = '0.7';
-        }
-
-        function hideVisualResource() {
-            const visualDiv = document.getElementById('visualResources');
-            visualDiv.style.opacity = '0';
-        }
-
-        // HOLOGRAMA 3D AVANZADO CON DESCOMPOSICIÓN DINÁMICA (Point 8)
-        const canvas = document.getElementById('holoCanvas');
-        const ctx = canvas.getContext('2d');
-        let time = 0;
-        const base_vertices = [], edges = [], mouth_indices = [], jaw_indices = [];
-        const lats = 15, lons = 20, R = 80; 
-
-        for (let i = 0; i <= lats; i++) {
-            const U = Math.PI * i / lats;
-            for (let j = 0; j < lons; j++) {
-                const V = 2 * Math.PI * j / lons;
-                let x = R * Math.sin(U) * Math.cos(V);
-                let y = R * Math.cos(U);
-                let z = R * Math.sin(U) * Math.sin(V);
-
-                if (Math.abs(x) > 40) x *= 0.82;
-                if (z < 0) { z *= 1.40; y *= 1.05; } else { y *= 1.25; }
-
-                const is_front = (z > 0);
-                if (is_front && y < -10) {
-                    const jaw_factor = Math.pow(Math.abs(y + 10) / 75, 1.6);
-                    y -= 25 * jaw_factor;
-                    x *= (1 - 0.65 * jaw_factor);
-                }
+        // [BLOQUE ADITIVO] Función de enlace para actualizar visualizaciones desde Python/JS
+        // Tu código Python de CustomTkinter puede enviar comandos de ejecución a través del websocket o protocolo que utilices para invocar esta función.
+        window.setGeneratedVisual = function(visualData) {
+            const visualBackground = document.getElementById('bgVisualizer');
+            if (visualData && visualData.trim() !== '') {
+                visualBackground.src = visualData;
+                visualBackground.style.opacity = '0.35';
                 
-                base_vertices.push([x, y, z]);
-                const curr_idx = base_vertices.length - 1;
-
-                if (is_front) {
-                    if (y > -35 && y < -15 && Math.abs(x) < 20) mouth_indices.push(curr_idx);
-                    if (y <= -35) jaw_indices.push(curr_idx);
+                // Mensaje en consola simulando la recepción
+                const consoleOutput = document.getElementById('consoleOutput');
+                if (consoleOutput) {
+                    const msg = document.createElement('div');
+                    msg.className = 'msg-sys';
+                    msg.innerHTML = '[SYS] Nueva proyección generada por Arthur renderizada en el fondo.';
+                    consoleOutput.appendChild(msg);
+                    consoleOutput.scrollTop = consoleOutput.scrollHeight;
                 }
-
-                if (j > 0) edges.push([curr_idx, curr_idx - 1]);
-                if (j === lons - 1) edges.push([curr_idx, curr_idx - lons + 1]);
-                if (i > 0) edges.push([curr_idx, curr_idx - lons]);
-            }
-        }
-
-        function renderHologram() {
-            time += 0.04;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const cx = canvas.width / 2, cy = canvas.height / 2;
-
-            const yaw = time * 0.55;
-            const cy_a = Math.cos(yaw), sy_a = Math.sin(yaw);
-            
-            let working_vertices = base_vertices.map(v => [...v]);
-            
-            if (isTalking) {
-                let microMovement = Math.abs(Math.sin(time * 8)) * 1.5;
-                currentApertura += (targetApertura + microMovement - currentApertura) * 0.35; 
-                dispersionFactor += (1.5 - dispersionFactor) * 0.05; // Descompone las líneas levemente
             } else {
-                currentApertura += (0 - currentApertura) * 0.15;
-                dispersionFactor += (0 - dispersionFactor) * 0.1; // Reconfigura y vuelve a forma original
+                visualBackground.style.opacity = '0'; // Ocultar si no hay dato
             }
-
-            // Aplicar apertura de boca y descomposición visual orgánica
-            working_vertices.forEach((v, idx) => {
-                if(mouth_indices.includes(idx)) v[1] -= currentApertura * 0.8;
-                if(jaw_indices.includes(idx)) v[1] -= currentApertura * 1.5;
-                
-                // Descomposición visual (efecto de ruido 3D en las líneas)
-                if (dispersionFactor > 0) {
-                    v[0] += Math.sin(time * 5 + idx) * dispersionFactor * 5;
-                    v[1] += Math.cos(time * 3 + idx) * dispersionFactor * 5;
-                    v[2] += Math.sin(time * 4 + idx) * dispersionFactor * 5;
-                }
-            });
-            
-            const projected = working_vertices.map(([x, y, z]) => {
-                const rx = x * cy_a + z * sy_a;
-                const rz = -x * sy_a + z * cy_a;
-                const f = 250;
-                const sz = rz + 200;
-                return [cx + (rx * f) / sz, cy - (y * f) / sz]; 
-            });
-            
-            ctx.strokeStyle = isTalking ? "#00ffff" : "rgba(0, 229, 255, 0.6)";
-            ctx.lineWidth = isTalking ? (1.5 - dispersionFactor*0.5) : 1.0;
-            ctx.beginPath();
-            edges.forEach(([v1, v2]) => {
-                ctx.moveTo(projected[v1][0], projected[v1][1]);
-                ctx.lineTo(projected[v2][0], projected[v2][1]);
-            });
-            ctx.stroke();
-            requestAnimationFrame(renderHologram);
+        };
+    </script>
+            background-color: var(--bg-color); color: var(--text-color);
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #0a192f 0%, #050a12 80%);
         }
-        renderHologram();
+        
+        /* PANTALLA DE INICIALIZACIÓN */
+        #bootScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; transition: opacity 0.8s ease;
+        }
+        
+        /* LOGO SOBRE ESFERA NEON */
+        .boot-logo {
+            width: 140px; height: 140px; margin-bottom: 40px;
+            border-radius: 50%; 
+            box-shadow: var(--glow); 
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            background: radial-gradient(circle, #00e5ff 0%, #005566 100%);
+            object-fit: contain;
+            padding: 5px;
+        }
+        .boot-btn {
+            padding: 20px 40px; 
+            min-width: 280px; font-size: 18px; color: var(--accent-color);
+            background: rgba(0, 15, 25, 0.8); border: 2px solid var(--accent-color);
+            border-radius: 8px; cursor: pointer; box-shadow: var(--glow); text-transform: uppercase;
+            letter-spacing: 3px; transition: 0.3s; text-align: center;
+        }
+        .boot-btn:hover { background: var(--accent-color); color: #000; }
 
-        // CONTROL DE MENSAJES Y RESTRICCIÓN DE TRIAL
-        const input = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const micBtn = document.getElementById('micBtn');
-
-        async function sendMessage(text) {
-            if(!text) return;
-
-            // LÓGICA DE BLOQUEO VERSIÓN PRUEBA
-            if (!isPremium) {
-                if (trialQuestions >= MAX_TRIAL) {
-                    alert("Tu versión de prueba ha finalizado. Por favor, adquiere la suscripción mensual en la pantalla de inicio para acceso ilimitado.");
-                    input.disabled = true;
-                    sendBtn.disabled = true;
-                    micBtn.disabled = true;
-                    return;
-                }
-                trialQuestions++;
-                document.getElementById('license-state').innerText = `TRIAL (${MAX_TRIAL - trialQuestions} restantes)`;
-            }
-
-            logConsole(text, "user");
-            input.value = '';
-            
-            const targetLang = document.getElementById('langSelect').value;
-            
-            try {
-                // Consulta LLM proxy a Pollinations Text (Backend Mesh AI)
-                const sys = "Eres Arthur, IA Encarnada. Responde breve y directo.";
-                const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?system=${encodeURIComponent(sys)}&model=openai`);
-                const txt = await res.text();
-                
-                logConsole(txt, "arthur");
-                speak(txt, targetLang);
-                
-            } catch (error) {
-                const errTxt = "Error de conexión con la malla cuántica. Reintentando.";
-                logConsole(errTxt, "warn");
-                speak(errTxt, targetLang);
-            }
+        /* HUD HEADER */
+        .header {
+            padding: 15px 20px; border-bottom: 1px solid var(--accent-color);
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(0, 20, 30, 0.7); box-shadow: var(--glow);
+            backdrop-filter: blur(10px); z-index: 10; gap: 10px; flex-wrap: wrap;
+        }
+        .logo-container { display: flex; align-items: center; gap: 12px; }
+        
+        /* LOGO HEADER SOBRE ESFERA NEON */
+        .logo-container img { 
+            width: 45px; height: 45px; 
+            border-radius: 50%; 
+            border: 1px solid var(--accent-color); 
+            box-shadow: var(--glow); 
+            background: radial-gradient(circle, #00e5ff 0%, #005566 100%);
+            object-fit: contain;
+            padding: 2px;
+        }
+        .logo-title { font-size: 18px; font-weight: bold; color: var(--accent-color); letter-spacing: 2px; }
+        
+        .lang-select {
+            background: rgba(0, 0, 0, 0.5); color: var(--accent-color); border: 1px solid var(--accent-color);
+            padding: 8px 12px; border-radius: 4px; outline: none; font-size: 14px; text-transform: uppercase;
         }
 
-        sendBtn.addEventListener('click', () => sendMessage(input.value));
-        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(input.value); });
+        /* TELEMETRÍA NEUROMÓRFICA */
+        .telemetry-hud {
+            display: flex; gap: 15px; font-size: 11px; color: var(--accent-color);
+            background: rgba(0, 20, 30, 0.5); padding: 5px 10px; border-radius: 4px;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+        }
+        .telemetry-item span { font-weight: bold; color: #fff; }
+
+        /* MAIN LAYOUT */
+        .main-content {
+            display: flex; flex: 1; overflow: hidden; flex-direction: row; position: relative;
+        }
+        
+        /* AJUSTE RESPONSIVE OPTIMIZADO PARA MÓVILES */
+        @media (max-width: 768px) { 
+            .main-content { flex-direction: column; overflow: hidden; } 
+            .holo-container { 
+                flex: 0 0 28vh; 
+                min-height: 160px; 
+                width: 100%; 
+                border-right: none; 
+                border-bottom: 1px solid rgba(0, 229, 255, 0.2); 
+            }
+            .console-container, .payment-container {
+                flex: 1;
+                border-left: none !important;
+                border-top: 1px solid rgba(0, 229, 255, 0.2);
+            }
+            .input-area {
+                padding: 10px;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .input-area input[type="text"] {
+                flex: 1 1 100%;
+                order: -1;
+                margin-bottom: 2px;
+            }
+        }
+
+        /* WIDGET HOLOGRAMA 3D */
+        .holo-container {
+            flex: 1; display: flex; justify-content: center; align-items: center; position: relative;
+            border-right: 1px solid rgba(0, 229, 255, 0.2);
+        }
+        .hud-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><circle cx="50%" cy="50%" r="45%" stroke="%2300e5ff" stroke-width="0.5" fill="none" stroke-dasharray="4 8" opacity="0.3"/></svg>');
+            pointer-events: none;
+        }
+        
+        /* CORRECCIÓN: Prevención de deformación en la cabeza holográfica */
+        canvas { 
+            width: 100%; max-width: 450px; aspect-ratio: 1 / 1; height: auto; z-index: 2; 
+            object-fit: contain; margin: 0 auto; display: block;
+        }
+
+        /* CONSOLA NEUROMÓRFICA Y CHAT */
+        .console-container {
+            flex: 1; padding: 20px; overflow-y: auto; background: rgba(0, 10, 15, 0.8);
+            font-size: 14px; line-height: 1.5; display: flex; flex-direction: column; gap: 10px;
+        }
+        
+        /* SISTEMA DE PAGO INTEGRADO */
+        .payment-container {
+            flex: 1; padding: 20px; overflow-y: auto; background: rgba(0, 15, 25, 0.9);
+            border-left: 1px solid rgba(0, 229, 255, 0.2);
+            display: flex; flex-direction: column; gap: 15px; align-items: center; justify-content: center;
+        }
+
+        .payment-card {
+            background: rgba(0, 0, 0, 0.5); border: 1px solid var(--accent-color);
+            padding: 20px; border-radius: 8px; box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
+            width: 100%; max-width: 300px; text-align: center;
+        }
+
+        .payment-title {
+            color: var(--accent-color); font-size: 16px; margin-bottom: 10px; letter-spacing: 1px;
+        }
+
+        .console-container::-webkit-scrollbar, .payment-container::-webkit-scrollbar { width: 8px; }
+        .console-container::-webkit-scrollbar-track, .payment-container::-webkit-scrollbar-track { background: rgba(0, 20, 30, 0.8); border-left: 1px solid rgba(0, 229, 255, 0.2); }
+        .console-container::-webkit-scrollbar-thumb, .payment-container::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 4px; box-shadow: var(--glow); }
+        
+        .msg-sys { color: #00ffcc; text-shadow: 0 0 5px #00ffcc; font-size: 12px; }
+        .msg-warn { color: var(--warn-color); font-size: 12px; border-left: 2px solid var(--warn-color); padding-left: 8px; }
+        .msg-user { color: #ffffff; background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 5px; border-left: 3px solid #fff; align-self: flex-start; max-width: 90%; word-wrap: break-word;}
+        .msg-arthur { color: var(--accent-color); background: rgba(0, 229, 255, 0.05); padding: 10px; border-radius: 5px; border-right: 3px solid var(--accent-color); align-self: flex-end; max-width: 90%; word-wrap: break-word;}
+        .msg-patch { font-family: monospace; color: #a349a4; background: rgba(163, 73, 164, 0.1); padding: 8px; border: 1px dashed #a349a4; font-size: 11px; margin-top: 5px;}
+
+        /* CONTROLES */
+        .input-area {
+            padding: 20px; background: rgba(0, 15, 25, 0.9); display: flex; gap: 12px; align-items: center;
+            border-top: 1px solid var(--accent-color); box-shadow: 0 -5px 15px rgba(0, 229, 255, 0.1); z-index: 10;
+        }
+        .ext-search-toggle {
+            display: flex; align-items: center; gap: 5px; color: var(--accent-color); font-size: 12px; cursor: pointer;
+        }
+        .ext-search-toggle input { cursor: pointer; }
+        
+        input[type="text"] {
+            flex: 1; padding: 15px; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.4);
+            background: rgba(0, 0, 0, 0.6); color: #fff; outline: none; font-size: 16px;
+            box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
+        }
+        input[type="text"]:focus { border-color: var(--accent-color); box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.3); }
+        button {
+            width: 55px; height: 55px; border-radius: 12px; border: 1px solid var(--accent-color);
+            background-color: rgba(0, 42, 64, 0.8); color: var(--accent-color); font-size: 20px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; transition: all 0.3s ease;
+        }
+        button:hover { background-color: var(--accent-color); color: #000; box-shadow: var(--glow); }
+        .mic-btn.recording { background-color: #ff0055; border-color: #ff0055; color: white; animation: pulse 1.5s infinite; box-shadow: 0 0 20px #ff0055; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div id="bootScreen">
+        <!-- Actualizado a icon.png -->
+        <img src="icon.png" alt="Arthur Logo" class="boot-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
+        <button class="boot-btn" id="startSystemBtn">Initialize Omni Core</button>
+    </div>
+
+    <div class="header">
+        <div class="logo-container">
+            <!-- Actualizado a icon.png -->
+            <img src="icon.png" alt="A° Core" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2300e5ff\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>'">
+            <h3 class="logo-title">A° OMNI CORE</h3>
+        </div>
+        
+        <div class="telemetry-hud">
+            <div class="telemetry-item">QNN: <span id="qnn-state">1.00</span></div>
+            <div class="telemetry-item">Spikes: <span id="spike-state">0.0%</span></div>
+            <div class="telemetry-item">Buffer: <span id="mem-state">0 exp</span></div>
+        </div>
+
+        <select id="langSelect" class="lang-select">
+            <option value="es-ES">Español</option>
+            <option value="en-US">English</option>
+            <option value="fr-FR">Français</option>
+            <option value="de-DE">Deutsch</option>
+            <option value="zh-CN">中文 (Chinese)</option>
+            <option value="pt-BR">Português</option>
+            <option value="ja-JP">日本語 (Japanese)</option>
+            <option value="ru-RU">Русский (Russian)</option>
+        </select>
+    </div>
+
+    <div class="main-content">
+        <div class="holo-container">
+            <div class="hud-overlay"></div>
+            <!-- Canvas con aspect-ratio y dimensiones corregidas para evitar deformación -->
+            <canvas id="holoCanvas" width="450" height="450"></canvas>
+        </div>
+
+        <div class="console-container" id="consoleOutput">
+            <div class="msg-sys">[SYS] Inicializando QNN Virtual Environment... OK</div>
+            <div class="msg-sys">[SYS] Motor de renderizado holográfico... ONLINE</div>
+            <div class="msg-sys">[SYS] Módulos de procesamiento multilingüe SOTA... ACTIVOS</div>
+            <div class="msg-sys">[SYS] Subsistemas de Auto-Reparación (QEC)... ACTIVOS</div>
+            <div class="msg-sys">[SYS] Malla Neuronal Libre (Open LLM Mesh)... ONLINE</div>
+        </div>
+
+        <!-- SECCIÓN DE PAGO (PANTALLA DIVIDIDA) -->
+        <div class="payment-container" id="paymentSystem">
+            <div class="payment-card">
+                <h4 class="payment-title">ESTADO DE LICENCIA</h4>
+                <p class="msg-warn" style="margin-bottom: 15px; border-left: none; text-align: center;">VERSIÓN TRIAL ACTIVA</p>
+                <button class="boot-btn" style="min-width: 100%; padding: 10px; font-size: 14px;">DESBLOQUEAR OMNI CORE</button>
+                <div class="msg-sys" style="margin-top: 15px; font-size: 10px;">Procesando a través de pasarela segura...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <label class="ext-search-toggle" title="Habilita búsqueda de información externa en tiempo real">
+            <input type="checkbox" id="liveSearchToggle" checked>
+            🌐 Live
+        </label>
+        <button id="micBtn" class="mic-btn">🎙️</button>
+        <input type="text" id="userInput" placeholder="Inicializar secuencia de comandos...">
+        <button id="sendBtn">➤</button>
+    </div>
+
+    <script>
+        (function () {
+            const ARTHUR_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAAAAW9yTlQBz6J3mgAAcnVJREFUeNrtvXd8nld5Pn6dc571Tu1pW957z+wNJIwwExICJQEKBGiBtt9SaEvLr6WltN/Ct+w9m0AIhE0SCJlkOXYcT8VbHpK1xzuefc79++O8khVb8nZsybo++siS9T7rPPd17nnuw4gIE5jAhQp+rm9gAhM4l5ggwAQuaEwQYAIXNIxzfQPjEKO5VYyxl+0MEzhBsAkn+DQxfABPRECVUvqQow9kjHF+fJ18slecwDEwQYCTxtCIHS18RBTHcRiGYRj6vh8EQTQMUkqlpJRKKQWQhj4PYwxgnHMhOOdCw7Isy7JM03Qcx7Zt/athGCNed7RbmsCxMUGA42M08SKiIAhc1y0UCp7nua7reV4YBLGMZRwT6ZmeAAbGGBgYA7iWdTAAw89GKGkFAhSICITBwzWEMIRh2LbjOE4ymUwmk6lUKplM2rZ9hN6Y4MOJY4IAo2Joeh7+P77vF4vFgYGBXC7nukXf9+MoVErpTzIuwAwwA0wAAkzLpWJEgGSQDDEoZlAAAcSgAACcwAAGCIIgZhAEwME4gZc+SQoUE0miGCou3RvnpmHZjpNKpbLZbDabTafTjuMccc+YYMLomCDAkThCYojIdd2BgYH+/v7+/n7Pc6MoJKUYY4wb4CZjJjEDYIwkgy+oKChnUM6gXpP6BAqC8oLyHEVOAaOQI2QUAQQoRooAQAs6J2YSLAWLmCWRlCwjWUaybMQqYlYuWVayrOIpxRyCAMAoBkWkIlIxETHGTctKJJJlZWXl5eVlZWWpVGr4g2CCCUdhggAlENFw4QiCYGBgoKenp6+vzy0W4zgkIs4NJkwwm5gBUhyuQQMmdTrqoEXtFnWY1GVQLyeXkQ+KQQpEjHFtBYHxkjVTmu/BGCOgZOwMegVE2nqiQYuIARxMEHMUS8a8MmLVEa8NeWPIGyJeG/NyYgkCZyRBIclQqRiMGYaZSqUrKiqqqqrKy8styxrtYS9kXOgEOGJe9Dyvp6enq6urv78/CDxSinPBhE3MBgRDYFCvTW2O2puk3TYdMKmHqzyjgIjAOGeCC0MIYRiccyY4YwxK6S+KYkSSohixJFJQBKUIAOeMMcYBIZhhwBTMNBjn4GCMMyJIRVKSjJWUUnvSRApgYJbimZhXB3ySL6YHYlrIG2NeScxmUFAByUApyRi3nURZWVltbW1lZWUymRzx2S9MXKAEOFruu7q6Ojo6crmBMAgYAxcWuEMwGUKTuhK0N6l2JGm7rQ4I1Q8KCeDcFIZhGoZpcC6gFIKQBgqqZ0B29ar2XnWgU3b3qZ4cdfWp7n5V9MgLyAvID7VMQ0oAEAKCQwhmm0g6LGGzhMMqMrymnNeU87pKPqnGqKvi1WWiMivKUty2OOdMKUSRiuJYxrGSMRGBW4qXh2KyJ2Z5xtxATI15NTGLUQzlKxkSwbLtsrLy2trampqaRCIx4mhcULjgCDBc+0dRpOW+t7c3DHzGwA0bLEHggnI27UvT1rTakqA9QvWCYmKGYZiWaZom5wxeoHoH5IFOub0l3rZX7joo97bJAx2y6OvoTQkJB5kUMimkkkg6SDhwrJLQGwIAYgmpICX8EJ4P14froeghV0SxOPzemWOyKXXG1Hoxe4pYOMOcOcmcUmtUlQnH4gSEoQrDOI4jkAQzFC8LjGmuscgVC0KjSfIsg4TyVRwQwbKdysrK+vr66upq0zSPHpwLBBcQAYa/3YGBgUOHDnV0dLhugYG4sMETBGFQb5J2Zmh9Wm20VBsjlyCEYduWaZlcKdU7oPa0xlv2xM9tjZ5rjncflGGsIzmoLEdDDZoaUFeNyjJkkrBMGAKxRBQjihGEpa8ogqSSaQSAc3AOwWCasC3YFmwTpglDwDAgJcIIeRe9/ejswf52tHeju7f0UKbgMxqN5XPMVfOtJTPNaY1mZUZwzsOYAj+K4wCkwBOxaCyaC11zuWfMVrwcUJCekiEByWS6tra2oaGhvLz86IEa97ggCDD0RqWUHR0dra2tfX29Mo6EYYAnCZagXJKay+iZjNpgqXaiEMyybNuxBWPUOyCbW+K1W6MnNkRrt8Z9eQnAMDCzCbObMK0RNZWwLUQxCi66+9DVh+4+9OXQl0OhiDBCGJ3KbZsGbAuZFMqzqMiiugI1FaiuQCYFw4Dvo7sfLW3YuQ97DiCKAKA8LVbMtS5bYl+0wJo31arIGETwQxkGIcmIcTMy6l1jUcG6yDPmKJ7liEi6Mo6FYZaXV0yePLmurk4IgQvGLhrPBBj+Cn3fb21tbWtrKxTyjJEQjmJJRlGCdpXTU1l6zlb7SIWMO7ZtOTaPY7WnNX56c/TH58LHn486+yWAijIsmYuFM9FQA8tEvoi2Thxox8F2HOrCQAHHGEt2dO5r8LcjDyIQjnOqbBr11WhqxJQ61Ncgm0IkcagT23Zj80709AFAVda4fIl93Sr7ogV2U4NpGcIPVOCHpAJwMxKTi9aqvHVxYEwHM5nyZOwTWDqdaWhomDx5suM4uABoMD4JMPy1FYvFAwcOtLW1Bb4nBIdIEmyDurK0voIeS6mtTBWIWZblJBM8CNWOfdEj68NfPR4+tSkCyLaxYj5WLsSkOgBo78aOFuw5gIPtKHpHjabO9pZuoiTZpzPA+mzDmUM0wgkTDibXYdZUzG5CfQ0YQ2sHXngRz2+D6wFgq+fZr73UuWZlYvZkyza5G6jA95kKSaR9c17Ousy1VsaiiiOk2JVS2k6yoaGhqakplUphXNNgHBJgyODJ5/P79u1rb2+PQt8wTOIpAnOopUI9UkmPm6pVERNGIpU0QGpPa/zgM+E9fwjWNUcAaqtxxQosno1kAp292LIT2/fiwCHEctjYDYn78ebsM47h+uQISgiOyfVYMBPzZ6KuGp6Prbvw5PNo6wSA5bPtN1+VfOXqxPRGizFWdOM48jmjWDTk7UvyzpWBmMoYIIsyjkzLqaurmzZtWiaTwTj1DcYVAYbeULFYbGlpaWtri6PAMC3FUiCZpi3VdH+WnuNqQMFJOHbCRne/fOi58K77/YfWRgRqqMW1F2HBTHCGXfvxfDN27H3JTF8qunnZJf7Y0GTQwqnU4f9POpg7HcsXYFYTiNC8G48+h4PtANg1y51bX5m6ammiutzwQ3hewMgnkXWtlf32db61AMxgqhhHkWFaDQ0N06ZNS6fTGHc0GCcEGHorvu/v3bu3tbU1inzDsBRLMwoz9Hwt/SZNG0gFjCdTKZNDbd4V/fgPwd0PBJ19Mp3CKy7BqoUQAs278dwW7NgLOShJnAFsZNvj/ERJNRHU4A1zhjnTsXox5s+AUli/DQ89jXwBlRnjluuSN12TWjTdJvCCG1HscW651pL+xPWutRTM0jQwLauxcdKMGTOGfIPxQYMxT4Ah8zSO4/3797e0tAS+Z5gGsTQoztLaOvwipTYrpbiRzKSE58vHng+/fp/34DMhgBUL8cpLUVOBnfvwzEZs2TFM7rk+/5iR+6MxZCmpYQ+1aDYuWYZZTejpx0NPY90WALhuZfKO16SvWJJIOKLgShl6nHPfWtCfeE3RXglmMlWIo9h2ElOnTp06daphGBgXNBjbBBh6AW1tbbt37y7kc4bBiaeJkKV1tfTzDG2QCoaZzCRZf17+/NHgSz/xtu2NbQs3XoM1i1Fw8fQLePoFFNzSOTl/ydw5bqD12BAT0klctASXLkc2jXVb8KtH4PmYM9l6/xszr78sVZ4x8kUVhZ7g8MzF/cnXFe3lnDGSRRnLdCY7c+bMxsZGjH0OjFUCDI17LpfbuXNnZ2en4MRESpKZxrZ6uidLzyqpuJEqS7OO3vjHv/e/dI9/oFNOqsObX4HpU7BjLx56Brv2lU44XuX+aBzBhFlNuO4SzJmGllb84o84cAgNVeb735C5+epUbYWVc1UcuoIz117Rm3yzb83jiCj2pKKamto5c+Zks1mMZRqMSQLo4ZZS7t69e9++fTIODdOOkXZofx39tJL+SMpnIlWW5r0D8V0P+P/1Q6+rT82Zhje/ElXleHYTHn4Wvf3AoLk8pu2cU8MRD15RhmsvwsVL0TuA+/6A7XtRmTE+fHPm1mszFWVmrqAoKjLDyTtX9CVfHxlTBBXjKBCG1dTUNHPmTMMwxigHxhgBhka5u7v7xRdfzOUGLNOQLM3Jq6Ff1+FnQvZIlirPGEUvvuuB4D+/77V1y/kzcfP1SCbw6Fo8uhZ+AACcX4hyfzQ0E7RCsC1cvQbXrIEf4N4HsXUX6iqMj7617OZr0inHyBVjplwSFf3JGweS1xNPMFWMojibLZs3b151dTXGoCoYSwTQgxtF0Y4dOw4ePAAoLpKSzDKsbaQfpmhbpBLplM0hf/2n8F++6Ta3xLOn4pbXIJ3E75/Eo2sP195MiP4RGE4DznHlatxwGYoe7rkfO1owa5L18XeU33BREiTybmTAC63Zvam3Fp1VHJGKXSI+ZcqUOXPmmKY5tjgwNggwNKY9PT3btjXn8wOWaUqWMamzkX5Qjd/HEqaVzCTpmc3Rp75RfGR9VFOJd70JNZX4w9N46Klhoq8wBh743IHzw2N13cV45WXo6cP3foGObly2KPGJPytfMz+Rd1kUuEIgn7i6N3VLbNQIVQijKJPJzp8/f2ypgjFAAD2USqmdO3e2tLQwSCaSioxKengSvmeqNolMeZa398T/94fel+/1hMC734yFs/DYc/jtY6VCtKH3OoETwdBwmQZeezWuXo1tu/GdnyOO8O7XZD9yc3ldhdVfkFwVlFnXk7o1n7iSM6liFxDTpk2bPXs253xMcOB8J4AexEKhsGXLlt7eHss09MQ/hb5ZiUdCaSUcxzTljx7wP/Flt7tf3XAFXnMlNm7Hzx5Efx6YEP3TwNDQlWVw06uwZC4eeAL3P4HKjPFPd1TcdHUmltzzfZNHeeeynvSfDaqCuLKyatGiRel0+vznwPlLgOEx/ubm5igKDMOOKVGBJ6bQ1011SLJMZRYvtkQf/5J7/1PhzCl491vgB7j7N9h9AJgQ/TOEoWGcPhlvvxFJB9/5GXbtx3Urk5+6o3JOk9OXV1oVdGfeWbAvEcyPo8Aw7AUL5p//uYLzlAB6yIioubl53759hgDxNCNvMr5bQ7+OpEgkHEOob9znfeJLbhjTn9+MRbPwy4fxyLPAhJt7pjHcRb56Dd54HbbuwjfvhSH4P99RcccNWUnC83xTxAPJ63vSt4EnIAuxxNSpU+fPn69f5fnJgfORAHqwfN/ftGlTd3eXbZkRZZLYOY3+X5K2hpStKuO7D0Z//bnig8+Ey+bjnW/A7v34/i9RKJYKws6/ZxoPGBrbdBLvfANmT8UPf4Xnt+Ga5cl/e2/VjEa7Ly8N5ANrXlfmfYE106BCEEbV1TWLFy9OJBLnJwfOOwLoYert7d20ebPvFg3TjilRTQ9MwdehisxIlaXUXff7H/1vN++qO2/FnGm469dYvxWYsHleFgwN8ooFePuN2LUPX/0xUrb4zJ2VN1+dKfhMRUVmpLrT78wlrjPgR1HgJJJLliyprKw8DzlwfhFAD1Bra+uWrVsZ6WiPmkLfrsN9gXIyKdPz4098yf3Or/zZU3HnrdhzAN/+GfxgwuZ5WTFkETkW3v0WzGrC136CHXtx2ysy/3xHVdIx8m5ocX8g+dru9DsY5xR7YGLhwoWTJk063zhwfhEAwK5du3bu3GkakCxjUddU+nwZng1UWXU5nm8O3/tvhS275VtvwBWr8KPf4qkNwMTEf44wNOyXLsfbXosn1uEnD2DuFOsLH6lZNtvpySkLec9e3pH9oDSqmCrGMc2ePXvWrFnn+sZAzTEcRb8KXa/DrQGZryumhteFt/5gvevTJD6Avjy/+ELGckP7zHfoFGQJ/+Q5UZPHpr8Ex+Tc/Vnv1slRPTlksn0te35X9c85UHPqpdGbVqlXnNkVwbgigH9h13XXr1rluwTASimg6/qsSDweyrLaC7n7Qv/2fC3VV+Pj7sG4z7voNAHB2QazYGusYek23vQ5rFuMz30RHN/vKX1ffdFWmOwcLuULiio7shzhnceQnk+lVq1Ylk8lzxQHxqU996mW+5LC5f53nFoSRIJIz8ZkKejyk8tpy9eV7/Ts/U5w3HR9/L375R/zy4cN9GSZw/oMAxsAZNu1AFOMDb8PuA/j+79zyDL9iUaIQOol4py0PFuyLhGEFgdvV1V1bW3uuFhK83AQYsvv13C+MBCiaiX8ro6diKqvKyk9/1/3El93Vi/HBt+Gb9+LJDRB8YuIfeyBAcOw+gLZOfOjt6OrBD+/3wHDdCseNHDve48h9BXuNEHYQuN3dPXV1deeEAy8rAYZiPuvWrSvkc4aZIJKz8G/l9EyMssqs/Kevu//+He/ai/D21+Hz38eWnRDicJ+SCYwtEEEItHViRws+cCs8H3c94IcxvXJVwoscK97ryH0F+yIhrMB3e3p76+vrdbeVlxMvKwH0Svb169cPDPSZZkIRZuIz5fRUhLKKjPzEl9z/+7/eDVfg9dfiM99AS+uEyzvmQQTB0d2HF17Ee28GEe56wC/46vrVmgMttmzN25cIw/DcYn9/f319/YnslHwG8fIRQHvbL7zwQnd3p2U6isR0/GcFPR5RWVWZ/NgXi//vR/7rrsYNV+DfvoZDXRPSP05ABM6RK2D9Vrz7LTAF7n4gKPrqhosSbuQ48R5LtResiw2DFwv5QqHY0NCAl7ER78tEAG38bNmypa2t1basiJyp+EI1HgyprLpMffJr7n//r3/j1XjlpfjXr6Krd0L6xxU0Bwou1m3BHW+CaeLuB4IwputXJYqRnYh2GjRQsC8yDQwMDARBUFdX97I5Ay8HAfTD7Nq1a++ePbZtRpSZjO/U4WeBLKstV5/+jvvv3/Guvxw3XIF/+UqpwmdC+scZNAeKHp7bgne9GSDc9YDPGV6xMpEP7GS8jUEWrVWWkD29fZzzqqqql4cDZ50A+jHa2tq2bdtmWyKibD3unYTvBjJbV0Ff/In/9192r7kIb3gF/u2r6OqbkP5xC80B18Pz2/Dem+EFuOsBP5vmVy1J5H0rHW9SPOlai00ed3X36K2/XwYOnF2HQz9AX1/fli1bTAMRZSvx6GR8M4hTNeV014P+X3++uHoxbr4B//ENdPRMSP84h1LgHJ09+Mw3cfP1WL0In/xWz72P5avKeKiS1YUfpv0nJc8Ygm3evKWvr08XjZ7VWzqLBBgK+W/cuBEUS5ZJYds0fD6SZlUZ/8Pa8I5PFedOx3tuwue+h9aOCem/IKA50NqBz30P77kJc6fjg5/renRDsTwjImnU5r7mhNtJpAG5ceNG3/fPNgfOrgZQSm3atMn3XCZSJnXNpM8o6aeT5ra94dv/MV9bRR99J75+D3btm5D+CwiaA7v24+v34KPvRH01vfe/OnceCFJJS8V+3cAXRNzNjYTnuZs2bVJnWSzOFgH09L99+/bu7i7TsojUdPpvk1otK5ErRLf+Q8EL6O/fh3sfwIZtEBPSf4FBKQiODc34yQP4+HsRxOo9n+3IFUPTSoi4rS73FVLKNO3u7q7t27efVSVwVgigpf/QoUMtLS22ZUYqOZm+ncU6xbOWEd/+qcKOffLv349nNuLhZyH4RK73QoRUEByPPItnN+Hv34ddrdGHPt9lCkU8kwg2VBXuknAsy2xpaTl06NDZ48CZJ4CW/mKxuG3bNkMgokw1PVCH+wKVrcqqv/+y+8fnog/dhv4cfvRb8Anpv4AhFTjHj36L/hw+dBsee8H79A97K9IUIlPu/jbrPSxZ2hDYtm1bsVg8Sxw4KxpAKbV585YoCoink9jRhK8H0qkux/d+7X/xJ/5rrsSUBnzxrlJ/+glcyCACY/jSXZjSgNdciW/8auBHf8xXZXio7Or89+xoN0QqCoPNmzefJWfgDBNgKOfV29ttGDYjbxr9D6liJm0+3xz+xX8W58/E667B576HOC49/r/H+OAAAAAElFTkSuQmCC";
+            
+            // LÓGICA DE INICIALIZACIÓN
+            const startBtn = document.getElementById('startSystemBtn');
+            const bootScreen = document.getElementById('bootScreen');
+            if (startBtn && bootScreen) {
+                startBtn.addEventListener('click', () => {
+                    bootScreen.style.opacity = '0';
+                    setTimeout(() => { bootScreen.style.display = 'none'; }, 800);
+                });
+            }
+
+            // CORRECCIÓN: Script para interactividad del botón de micrófono en Trial
+            const micBtn = document.getElementById('micBtn');
+            if (micBtn) {
+                micBtn.addEventListener('click', function() {
+                    this.classList.toggle('recording');
+                    const consoleOut = document.getElementById('consoleOutput');
+                    if(this.classList.contains('recording')) {
+                        consoleOut.innerHTML += '<div class="msg-sys">[SYS] Módulo de escucha activado. (Versión Trial)</div>';
+                    } else {
+                        consoleOut.innerHTML += '<div class="msg-warn">[WARN] Grabación detenida. Procesamiento suspendido.</div>';
+                    }
+                    consoleOut.scrollTop = consoleOut.scrollHeight;
+                });
+            }
+        })();
     </script>
 </body>
 </html>
