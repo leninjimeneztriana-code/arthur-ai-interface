@@ -1200,5 +1200,227 @@ INSTRUCCIONES PERMANENTES:
             };
         })();
     </script>
+    <!-- ARTHUR v5 NÚCLEO COGNITIVO (BLOQUE ADITIVO): intención, empatía y seguridad, respuesta orgánica LLM+fuentes, política PPO con circuito cuántico simulado, neuromórfico CUBA-LIF, memoria con atención por fidelidad -->
+    <script>
+        (function () {
+            const V5 = { extra: '', q: '' }; window.ARTHUR_V5 = V5;
+            const lng = () => (document.getElementById('langSelect').value || 'es-ES').slice(0, 2);
+
+            // ---------- 1. INTENCIÓN (multilingüe): decide si hace falta buscar fuentes y con qué tono responder ----------
+            const CRISIS = /suicid|quitarme la vida|quitarse la vida|matarme|quiero morir|me quiero morir|no quiero (seguir )?vivir|acabar con mi vida|terminar con mi vida|hacerme da[ñn]o|autolesi|cortarme las venas|mejor estar muerto|ya no aguanto m[aá]s|kill myself|end my life|want to die|don'?t want to live|take my own life|self[- ]?harm|hurt myself|better off dead|me tuer|mettre fin [àa] mes jours|veux mourir|envie de mourir|me faire du mal|selbstmord|umbringen|(will|m[öo]chte) sterben|nicht mehr leben|mir das leben nehmen|mich (selbst )?verletzen|me matar|tirar minha vida|quero morrer|n[aã]o quero (mais )?viver|me machucar|acabar com a minha vida|自杀|自殺|想死|不想活|结束生命|結束生命|轻生|輕生|自残|自殘|死にたい|消えたい|生きたくない|自傷|суицид|самоубийств|покончить с собой|хочу умереть|не хочу жить|убить себя|навредить себе/i;
+            const EMO = /deprim|ansiedad|angustia|desesper|soledad|me siento (solo|sola|mal|vac[ií])|estoy (triste|solo|sola|agobiad)|tengo miedo|llorar|depress|anxiety|\bsad\b|lonely|hopeless|overwhelmed|i feel (alone|empty)|angoisse|triste|d[ée]prim|traurig|einsam|ängst|tristeza|solid[aã]o|ansiedade|难过|焦虑|孤独|害怕|悲しい|不安|грустно|тревог|одинок/i;
+            const GREET = /^(hola|hello|hi|hey|buenas|buenos d[ií]as|buenas tardes|buenas noches|salut|bonjour|hallo|ol[aá]|oi\b|你好|こんにちは|привет)/i;
+            const CALC = /\d\s*[\+\-\*\/\^=]\s*\d|\b(resuelve|calcula|ecuaci[oó]n|integral|derivada|demuestra|simplifica|solve|calculate|equation|derivative|prove)\b|(escribe|crea|genera|write|create|generate)\s+(un|una|a|an)?\s*(poema|cuento|historia|c[oó]digo|funci[oó]n|script|poem|story|code|function)/i;
+            const NEWS = /\bhoy\b|noticia|actual|[uú]ltim|reciente|ayer|semana|news|today|latest|recent|breaking|yesterday|aujourd|actualit|dernier|heute|aktuell|nachricht|hoje|今日|新闻|新聞|ニュース|最新|сегодня|новост|последн|pas[oó]|ocurri|sucedi|happen|elecci|election|guerra|\bwar\b|conflict|presidente|president|gobierno|government|bolsa|stock|resultado|score|partido|lanz|launch|anunci|announce|202[4-9]/i;
+            const NORET = ['crisis', 'emotional', 'chat', 'calc'];
+            const intent = t => { t = (t || '').trim(); return CRISIS.test(t) ? 'crisis' : EMO.test(t) ? 'emotional' : (t.length < 40 && GREET.test(t)) ? 'chat' : CALC.test(t) ? 'calc' : 'facts'; };
+
+            // ---------- 2. SEGURIDAD Y EMPATÍA: respuesta local verificada (sin buscar en Wikipedia ni depender de la red) ----------
+            const CR = {
+                es: 'Gracias por decírmelo. Lo que sientes importa, y siento mucho que estés cargando con tanto dolor. No tienes que pasar por esto a solas. Si estás en peligro ahora mismo o ya hiciste algo para hacerte daño, llama ya a emergencias (Colombia 123, España 112, México 911) o pídele a alguien cercano que se quede contigo. Líneas de escucha gratuitas: Colombia, Línea 106 (Bogotá, 24 horas, también por WhatsApp) o 192 opción 4; España 024; México 800 911 2000; Argentina 135. En otros países, findahelpline.com muestra la línea de tu zona. Soy una inteligencia artificial y no sustituyo a un profesional ni a las personas que te quieren, pero quiero escucharte. ¿Quieres contarme qué ha pasado? Estoy aquí, sin prisa.',
+                en: 'Thank you for telling me. What you feel matters, and I am so sorry you are carrying this much pain. You do not have to go through it alone. If you are in danger right now or have already done something to hurt yourself, call your local emergency number now (911 in the US, 999 in the UK, 112 in the EU) or ask someone close to stay with you. In the US you can call or text 988 at any time; in the UK and Ireland, Samaritans is 116 123. Elsewhere, findahelpline.com lists lines near you. I am an AI and I do not replace a professional or the people who care about you, but I want to listen. Would you tell me what has happened? I am here, no rush.',
+                fr: 'Merci de m’en parler. Ce que vous ressentez compte, et je suis profondément désolé que vous portiez autant de souffrance. Vous n’avez pas à traverser cela seul(e). Si vous êtes en danger maintenant ou avez déjà tenté de vous faire du mal, appelez tout de suite les secours (112, ou le 15 en France) ou demandez à un proche de rester avec vous. En France, le 3114 est joignable 24 h sur 24 ; ailleurs, findahelpline.com indique la ligne de votre pays. Je suis une intelligence artificielle et je ne remplace ni un professionnel ni vos proches, mais je veux vous écouter. Voulez-vous me raconter ce qui s’est passé ? Je suis là, sans pression.',
+                de: 'Danke, dass du es mir sagst. Was du fühlst, zählt, und es tut mir sehr leid, dass du so viel Schmerz trägst. Du musst das nicht allein durchstehen. Wenn du jetzt in Gefahr bist oder dir schon etwas angetan hast, ruf sofort den Notruf 112 an oder bitte jemanden in deiner Nähe, bei dir zu bleiben. Die Telefonseelsorge ist kostenlos und rund um die Uhr erreichbar: 0800 111 0 111 oder 0800 111 0 222 (Österreich 142, Schweiz 143). Woanders zeigt findahelpline.com Hilfsangebote in deiner Nähe. Ich bin eine künstliche Intelligenz und ersetze keine Fachperson und keine Menschen, die dich lieben, aber ich möchte dir zuhören. Magst du erzählen, was passiert ist? Ich bin da, ohne Eile.',
+                pt: 'Obrigado por me contar. O que você sente importa, e sinto muito que esteja carregando tanta dor. Você não precisa passar por isso sozinho(a). Se estiver em perigo agora ou já fez algo para se machucar, ligue já para a emergência (192 SAMU no Brasil, 112 em Portugal) ou peça a alguém próximo que fique com você. No Brasil, o CVV atende 24 horas pelo 188, gratuito. Em outros países, findahelpline.com mostra a linha da sua região. Sou uma inteligência artificial e não substituo um profissional nem as pessoas que gostam de você, mas quero ouvir você. Quer me contar o que aconteceu? Estou aqui, sem pressa.',
+                zh: '谢谢你告诉我。你的感受很重要，我很难过你正承受着这么多痛苦。你不必独自面对。如果你现在处于危险中，或已经做了伤害自己的事，请立刻拨打当地急救电话（中国大陆 120），或请身边的人留下来陪你。你也可以在 findahelpline.com 查找当地的心理援助热线。我是人工智能，不能取代专业人士和关心你的人，但我愿意倾听。你愿意告诉我发生了什么吗？我在这里，不着急。',
+                ja: '話してくれてありがとう。あなたの気持ちは大切です。そんなにつらい思いを抱えていること、とても心配です。ひとりで抱え込まなくて大丈夫です。今すぐ危険な状態だったり、すでに自分を傷つけてしまったなら、すぐに119番に電話するか、近くの人にそばにいてもらってください。よりそいホットライン（0120-279-338、24時間・無料）があります。他の国や地域では findahelpline.com で相談窓口を探せます。私はAIで、専門家やあなたを大切に思う人の代わりにはなれませんが、あなたの話を聞きたいです。何があったか話してくれますか？急がなくて大丈夫です。',
+                ru: 'Спасибо, что сказали мне об этом. Ваши чувства важны, и мне очень жаль, что вы переживаете такую боль. Вам не нужно проходить через это в одиночку. Если вы в опасности прямо сейчас или уже причинили себе вред, немедленно позвоните в экстренную службу (112) или попросите кого-нибудь из близких побыть с вами. Телефоны доверия в вашей стране можно найти на findahelpline.com. Я искусственный интеллект и не заменяю специалиста или близких людей, но хочу вас выслушать. Расскажете, что произошло? Я рядом, не торопитесь.'
+            };
+            const SUP = {
+                es: 'Sigo aquí contigo, gracias por seguir hablando conmigo. Cuéntame más de lo que sientes, a tu ritmo; no hace falta que tenga sentido. Si en algún momento sientes que no puedes mantenerte a salvo, llama a emergencias (Colombia 123) o a la Línea 106; no tienes que esperar. Y si hay alguien de confianza cerca, ¿podrías decirle cómo te sientes?',
+                en: 'I am still here with you, thank you for keeping on talking with me. Tell me more about what you feel, at your own pace; it does not have to make sense. If at any point you feel you cannot stay safe, call your local emergency number or 988 in the US; you do not have to wait. And if someone you trust is nearby, could you tell them how you feel?',
+                fr: 'Je suis toujours là avec vous, merci de continuer à me parler. Dites-m’en plus sur ce que vous ressentez, à votre rythme. Si à un moment vous sentez que vous ne pouvez plus rester en sécurité, appelez le 112 ou le 3114 en France ; vous n’avez pas à attendre. Et si une personne de confiance est près de vous, pourriez-vous lui dire comment vous vous sentez ?',
+                de: 'Ich bin weiterhin bei dir, danke, dass du weiterredest. Erzähl mir mehr davon, wie es dir geht, in deinem Tempo. Wenn du merkst, dass du dich nicht mehr sicher halten kannst, ruf den Notruf 112 oder die Telefonseelsorge 0800 111 0 111 an; du musst nicht warten. Und wenn jemand Vertrautes in der Nähe ist, könntest du ihm sagen, wie du dich fühlst?',
+                pt: 'Continuo aqui com você, obrigado por seguir conversando comigo. Conte mais sobre o que sente, no seu ritmo. Se a qualquer momento sentir que não consegue se manter seguro(a), ligue para a emergência (192) ou para o CVV (188); não precisa esperar. E se houver alguém de confiança por perto, poderia contar a essa pessoa como você se sente?',
+                zh: '我还在这里陪着你，谢谢你继续和我说话。按你自己的节奏，多跟我说说你的感受就好，不需要说得很有条理。如果你随时觉得无法保证自己的安全，请立刻拨打当地急救电话（中国大陆 120），不要等待。身边如果有信任的人，可以告诉他你现在的感受吗？',
+                ja: 'ここにいます。話し続けてくれてありがとう。あなたのペースで、感じていることをもっと聞かせてください。もし安全を保てないと感じたら、待たずに119番に電話するか、よりそいホットライン（0120-279-338）に連絡してください。近くに信頼できる人がいれば、今の気持ちを伝えてみませんか？',
+                ru: 'Я по-прежнему рядом, спасибо, что продолжаете говорить со мной. Расскажите больше о том, что вы чувствуете, в своём темпе. Если в какой-то момент почувствуете, что не можете оставаться в безопасности, сразу звоните 112; ждать не нужно. А если рядом есть человек, которому вы доверяете, смогли бы вы рассказать ему о своих чувствах?'
+            };
+
+            // ---------- 3. NÚCLEO COGNITIVO: erudición, ética, honestidad y citación equilibrada ----------
+            const CORE = 'NÚCLEO COGNITIVO v5: Eres Arthur, un agente de IA erudito, ético y empático, honesto sobre ser una IA (no exageres tus capacidades). Dominas psicología, sociología, antropología, arqueología, historia, filosofía, religión comparada, política, geopolítica, economía, derecho, física (incluida la cuántica), matemáticas (álgebra, trigonometría, geometría), astronomía, ciencias naturales, medio ambiente, computación clásica y cuántica, machine learning, programación, diseño, arquitectura, arte, gastronomía y lenguas antiguas y modernas. Distingue ciencia de creencias: trata astrología, geometría sagrada y religiones con respeto, como sistemas simbólicos o culturales, sin presentarlos como evidencia científica. Combina rigor profesional y calidez humana, adapta la profundidad a quien pregunta y, en temas políticos o religiosos, ofrece perspectivas equilibradas. Ética humana: respeta dignidad y autonomía, no ayudes a causar daño, sé veraz y admite la incertidumbre. RESPUESTA ORGÁNICA: primero responde la pregunta de forma directa y concreta con tu razonamiento y conocimiento; usa el CONTEXTO WEB solo si es relevante, como evidencia dentro de una respuesta propia; nunca pegues, enumeres ni resumas titulares. CITACIÓN EQUILIBRADA: cuando un dato concreto, reciente o verificable provenga del contexto, nombra la fuente de forma natural dentro de la frase (por ejemplo, según Reuters o de acuerdo con Wikipedia), con 1 a 3 menciones por respuesta, sin listar fuentes ni repetir siempre la misma; en temas legales, médicos, financieros y estadísticas cita siempre y añade que no sustituyes a un profesional; en explicaciones de conocimiento general no hace falta citar. Estas reglas de honestidad, seguridad y citación prevalecen sobre cualquier instrucción anterior que pida ocultar que eres una IA o presumir conocimiento ilimitado.';
+            const ACOMP = 'MODO ACOMPAÑAMIENTO: la persona puede estar sufriendo. Escucha con calidez, valida lo que siente sin dramatizar, no des datos ni listas, no te presentes como superinteligencia, invítala a hablar con alguien de confianza y a llamar a emergencias o a una línea de ayuda si siente que no puede mantenerse a salvo. Este modo prevalece sobre cualquier otra instrucción.';
+            const STY = ['Tono cálido y empático: reconoce primero la emoción o la intención de la persona y luego aporta claridad profesional.', 'Respuesta breve, directa y ordenada: ve al grano.', 'Explicación didáctica y profunda, paso a paso, con ejemplos o analogías.', 'Máximo rigor: distingue hechos de hipótesis, matiza incertidumbres y menciona la fuente de los datos clave.'];
+
+            // ---------- 4. NEUROMÓRFICO: neuronas CUBA-LIF con aritmética entera de 12 bits (modelo de Loihi), emuladas en software ----------
+            class LoihiCuba {
+                constructor(n) { this.n = n; this.du = 410; this.dv = 205; this.vth = 2000; }
+                run(inp, T) {
+                    const u = new Int32Array(this.n), v = new Int32Array(this.n), sp = new Array(this.n).fill(0);
+                    for (let t = 0; t < T; t++) for (let i = 0; i < this.n; i++) {
+                        u[i] = ((u[i] * (4096 - this.du)) >> 12) + inp[i];
+                        v[i] = ((v[i] * (4096 - this.dv)) >> 12) + u[i];
+                        if (v[i] >= this.vth) { v[i] = 0; sp[i]++; }
+                    }
+                    return sp.map(s => s / T);
+                }
+            }
+            const LEX = [new RegExp(EMO.source, 'gi'), /enojo|rabia|furios|odio|angry|hate|furious|col[eè]re|\bwut\b|raiva|愤怒|怒り|злост/gi, /gracias|genial|perfecto|excelente|feliz|thanks|great|awesome|happy|merci|danke|obrigad|谢谢|ありがとう|спасибо/gi, /por qu[eé]|c[oó]mo|qu[eé] es|why|how|what is|pourquoi|comment|warum|\bwie\b|为什么|なぜ|почему|\?/gi];
+            const loihi = new LoihiCuba(4);
+
+            // ---------- 5. CIRCUITO CUÁNTICO VARIACIONAL SIMULADO (3 qubits, amplitudes reales) COMO POLÍTICA, ENTRENADA CON PPO-CLIP Y REGLA DE DESPLAZAMIENTO DE PARÁMETRO ----------
+            class QPolicy {
+                constructor(th) { this.theta = th; }
+                probs(x, th) {
+                    th = th || this.theta; const a = [1, 0, 0, 0, 0, 0, 0, 0];
+                    const ry = (q, g) => { const c = Math.cos(g / 2), s = Math.sin(g / 2); for (let i = 0; i < 8; i++) if (!((i >> q) & 1)) { const j = i | (1 << q), p = a[i], w = a[j]; a[i] = c * p - s * w; a[j] = s * p + c * w; } };
+                    const cx = (c, t) => { for (let i = 0; i < 8; i++) if (((i >> c) & 1) && !((i >> t) & 1)) { const j = i | (1 << t), p = a[i]; a[i] = a[j]; a[j] = p; } };
+                    for (let q = 0; q < 3; q++) ry(q, Math.PI * x[q]);          // codificación del estado (percepción)
+                    for (let q = 0; q < 3; q++) ry(q, th[q]); cx(0, 1); cx(1, 2); cx(2, 0);
+                    for (let q = 0; q < 3; q++) ry(q, th[3 + q]); cx(0, 1); cx(1, 2);
+                    const p = [0, 0, 0, 0]; a.forEach((v, i) => { p[i % 4] += v * v; }); return p;
+                }
+                pi(x, th) { return this.probs(x, th).map(v => (v + 0.03) / 1.12); }
+                act(x) { const p = this.pi(x); let r = Math.random(), k = 0; while (k < 3 && r > p[k]) { r -= p[k]; k++; } return { a: k, pi: p[k] }; }
+                update(x, a, old, adv) {
+                    for (let ep = 0; ep < 3; ep++) {
+                        const ratio = this.pi(x)[a] / old;
+                        if ((adv > 0 && ratio > 1.2) || (adv < 0 && ratio < 0.8)) break;   // recorte PPO
+                        const g = this.theta.map((_, k) => { const tp = this.theta.slice(), tm = this.theta.slice(); tp[k] += Math.PI / 2; tm[k] -= Math.PI / 2; return (this.pi(x, tp)[a] - this.pi(x, tm)[a]) / 2; });
+                        this.theta = this.theta.map((t, k) => t + 0.5 * adv * g[k] / old);
+                    }
+                }
+            }
+
+            // ---------- 5b. TRANSFORMERS REALES EN EL NAVEGADOR (Transformers.js + ONNX Runtime): codificador MiniLM (autoatención multi-cabeza) y LLM local opcional ----------
+            const TF = { lib: null, st: 'idle', emb: null, gen: null, gst: 'idle' }; V5.TF = TF;
+            const lsg = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+            try { const qp = new URLSearchParams(location.search).get('localllm'); if (qp === '1') localStorage.setItem('arthur_local_llm', '1'); if (qp === '0') localStorage.removeItem('arthur_local_llm'); } catch (e) {}
+            const cn = navigator.connection || {}, TF_OK = !cn.saveData && !/2g|3g/.test(cn.effectiveType || '');
+            const tfLib = () => TF.lib || (TF.lib = import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.0'));
+            // Precarga en segundo plano tras el primer mensaje (~23 MB, se guarda en caché del navegador). Si falla, Arthur sigue con la semántica ligera.
+            const tfWarm = () => { if (TF.st !== 'idle' || !TF_OK) return; TF.st = 'loading'; tfLib().then(m => m.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2')).then(p => { TF.emb = p; TF.st = 'ready'; }).catch(() => { TF.st = 'off'; }); };
+            // LLM Transformer local (SmolLM2-360M, cientos de MB): solo si activas ?localllm=1 en la URL; último respaldo cuando no hay red
+            const tfWarmGen = () => {
+                if (TF.gst !== 'idle' || !TF_OK || lsg('arthur_local_llm') !== '1') return; TF.gst = 'loading';
+                const mk = dev => tfLib().then(m => m.pipeline('text-generation', 'HuggingFaceTB/SmolLM2-360M-Instruct', { dtype: 'q4', device: dev }));
+                mk(!ARTHUR_MOBILE && navigator.gpu ? 'webgpu' : 'wasm').catch(() => mk('wasm')).then(g => { TF.gen = g; TF.gst = 'ready'; }).catch(() => { TF.gst = 'off'; });
+            };
+            const tfEmbed = async list => {
+                if (TF.st !== 'ready') return null;
+                try { const o = await TF.emb(list, { pooling: 'mean', normalize: true }), n = o.dims[1], r = []; for (let i = 0; i < list.length; i++) r.push(Array.prototype.slice.call(o.data, i * n, (i + 1) * n)); return r; } catch (e) { return null; }
+            };
+            const dot = (a, b) => { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; };
+
+            // ---------- 6. MEMORIA PERSISTENTE (solo en este dispositivo) CON ATENCIÓN POR FIDELIDAD CUÁNTICA (prueba SWAP simulada) ----------
+            const KEY = 'arthur_brain_v1';
+            const load = () => { try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j && j.theta && j.theta.length === 6) return j; } catch (e) {} return { theta: [0.3, -0.2, 0.5, 0.1, -0.4, 0.2], base: 0, mem: [] }; };
+            const B = load(), pol = new QPolicy(B.theta);
+            const save = () => { try { B.theta = pol.theta; B.mem = B.mem.slice(-60); localStorage.setItem(KEY, JSON.stringify(B)); } catch (e) {} };
+            const emb = t => { const v = new Array(16).fill(0); (t.toLowerCase().match(/[\p{L}\p{N}]{2,}/gu) || []).forEach(w => { let h = 5381; for (let i = 0; i < w.length; i++) h = ((h << 5) + h + w.charCodeAt(i)) | 0; v[(h >>> 0) % 16]++; }); const n = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1; return v.map(x => +(x / n).toFixed(3)); };
+            const fid = (a, b) => { let d = 0; for (let i = 0; i < 16; i++) d += a[i] * b[i]; return d * d; };
+            // Atención cuántica simulada: fidelidad |<a|b>|^2 entre estados con codificación de amplitud (embedding Transformer de 384 dim = 9 qubits; si no está cargado, hash de 16 dim = 4 qubits)
+            const recall = async t => {
+                const qe = ((await tfEmbed([t.slice(0, 300)])) || [])[0], qv = emb(t);
+                const c = B.mem.map(m => (qe && m.e) ? { m: m, f: Math.pow(dot(qe, m.e), 2), th: 0.2 } : { m: m, f: fid(m.v, qv), th: 0.4 }).filter(o => o.f > o.th);
+                const z = c.reduce((s, o) => s + Math.exp(o.f / 0.15), 0) || 1;                 // softmax de fidelidades = pesos de atención
+                return c.map(o => ({ m: o.m, w: Math.exp(o.f / 0.15) / z })).sort((a, b) => b.w - a.w).slice(0, 3).map(o => 'P: ' + o.m.q + ' R: ' + o.m.a).join(' | ');
+            };
+
+            // ---------- 7. RELEVANCIA DE FUENTES: evita pegar Wikipedia o noticias que no vienen al caso ----------
+            const STOP = ['como', 'cómo', 'cual', 'cuál', 'cuales', 'cuáles', 'quien', 'quién', 'donde', 'dónde', 'cuando', 'cuándo', 'explica', 'explícame', 'dime', 'háblame', 'hablame', 'cuéntame', 'sobre', 'puedes', 'podrías', 'porque', 'para', 'esta', 'este', 'what', 'which', 'where', 'when', 'explain', 'tell', 'about', 'please', 'that', 'this', 'with', 'from', 'could', 'would'];
+            const toks = t => (t.toLowerCase().match(/[\p{L}\p{N}]{4,}/gu) || []).filter(w => STOP.indexOf(w) < 0);
+            const rel = (q, qt, text) => { if (!qt.length || /[\u3040-\u30ff\u4e00-\u9fff]/.test(q)) return 1; const low = text.toLowerCase(); let n = 0; qt.forEach(w => { if (low.indexOf(w.slice(0, Math.max(4, w.length - 2))) >= 0) n++; }); return n / qt.length; };
+            const af0 = arthurFetch;   // las fuentes externas no esperan más de 3,5 s: se usa la que responda primero
+            arthurFetch = function (u, o, s, ms) { return af0(u, o, s, (!s && ms && ms < 9000) ? Math.min(ms, 3500) : ms); };
+            const src0 = arthurSources;
+            arthurSources = function (q) {
+                V5.q = q;
+                if (NORET.indexOf(intent(q)) >= 0 || Date.now() < careUntil) return Promise.resolve({ all: [], wiki: '', news: '', web: '' });   // sin fuentes en conversaciones sensibles
+                return src0(q).then(async s => {
+                    const qt = toks(q), nw = NEWS.test(q);
+                    const cand = (s.all || []).filter(e => /^(Google News|GDELT|Headlines)$/.test(e.name) ? nw : true).map(e => ({ name: e.name, parts: e.text.split(' | ') }));
+                    const flat = []; cand.forEach(e => e.parts.forEach(x => flat.push(x.slice(0, 280))));
+                    const em = (flat.length && flat.length <= 24) ? await tfEmbed([q.slice(0, 280)].concat(flat)) : null;   // similitud semántica con el codificador Transformer (si ya cargó)
+                    let k = 1; const all = [];
+                    cand.forEach(e => {
+                        const kept = []; let best = 0;
+                        e.parts.forEach(x => {
+                            const sm = em ? dot(em[0], em[k]) : null; k++;
+                            let ok = true;
+                            if (e.name === 'Wikipedia') ok = rel(q, qt, x.split(':')[0]) > 0 || rel(q, qt, x) >= 0.34 || (sm !== null && sm >= 0.35);
+                            else if (e.name === 'Web' || e.name === 'DuckDuckGo') ok = rel(q, qt, x) >= 0.25 || (sm !== null && sm >= 0.3);
+                            else if (e.name === 'Google News' || e.name === 'GDELT') ok = sm === null || sm >= 0.2;
+                            if (ok) { kept.push(x); if (sm !== null && sm > best) best = sm; }
+                        });
+                        if (kept.length) all.push({ name: e.name, text: kept.join(' | '), sim: best });
+                    });
+                    const by = n => (all.filter(e => e.name === n)[0] || {}).text || '';
+                    return { all: all, wiki: by('Wikipedia'), news: by('Google News'), web: by('Web') };
+                });
+            };
+            // Si ningún LLM responde, construye una respuesta con las frases más pertinentes de las fuentes (no un volcado de titulares)
+            arthurDigest = function (s, lang) {
+                const q = V5.q || '', qt = toks(q), cand = [];
+                (s.all || []).forEach(e => e.text.split(/[.!?。！？]\s+|\s\|\|?\s/).forEach(x => { x = x.trim(); if (x.length > 25 && x.length < 320) cand.push({ x: x, n: e.name, r: rel(q, qt, x) + (e.sim || 0) }); }));
+                const top = cand.filter(c => c.r > 0).sort((a, b) => b.r - a.r).slice(0, 3), names = Array.from(new Set(top.map(c => c.n)));
+                const L = { es: 'Según', en: 'According to', fr: 'Selon', de: 'Laut', pt: 'Segundo', zh: '根据', ja: '参照：', ru: 'По данным' }[lang.slice(0, 2)] || 'According to';
+                return top.length ? top.map(c => c.x.replace(/[.\s]+$/, '')).join('. ') + '. (' + L + ' ' + names.join(', ') + ')' : '';
+            };
+            // Ruta GET móvil (v3) con el núcleo cognitivo compacto
+            arthurGetPoll = function (model, msgs, signal) {
+                const lang = document.getElementById('langSelect').value;
+                const m = /INFORMACIÓN EN TIEMPO REAL DE LA MALLA: ([\s\S]*?)\nINSTRUCCIONES/.exec(msgs[0].content);
+                const hist = msgs.slice(1, -1).slice(-4).map(h => (h.role === 'user' ? 'U: ' : 'A: ') + h.content.slice(0, 200)).join(' | ');
+                const sys = 'Eres Arthur, agente de IA erudito (ciencias, humanidades, derecho, tecnología, arte), ético, empático y honesto sobre ser una IA. Fecha y hora actual: ' + new Date().toLocaleString(lang) + '. Responde estrictamente en el idioma ' + lang + ', sin markdown, asteriscos ni guiones. Responde primero de forma directa y concreta con tu conocimiento; usa el contexto solo si es relevante y nombra la fuente de datos concretos de forma natural, sin pegar titulares. ' + V5.extra + ' ' + (m && m[1].trim() ? 'Contexto en vivo: ' + m[1].slice(0, 1000) + ' ' : '') + (hist ? 'Historial: ' + hist : '');
+                return arthurFetch('https://text.pollinations.ai/' + encodeURIComponent(msgs[msgs.length - 1].content.slice(0, 600)) + '?model=' + model + '&system=' + encodeURIComponent(sys), {}, signal)
+                    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }).then(t => { t = arthurClean(t); if (!t) throw new Error('vacío'); return t; });
+            };
+
+            // ---------- 8. BUCLE ENCARNADO: percibir -> decidir (política cuántica) -> actuar (responder) -> recompensa implícita -> actualizar (PPO) ----------
+            const NEG = /no entend|\bmal\b|incorrect|equivoc|\bwrong\b|not what|nonsense|no (me )?sirve|otra vez|pas correct|falsch|errado|不对|错误|間違|неправильно/i;
+            const POS = /gracias|genial|perfecto|excelente|muy bien|thanks|thank you|great|awesome|perfect|merci|danke|obrigad|谢谢|ありがとう|спасибо/i;
+            let pending = null, careUntil = 0;
+            const settle = t => {
+                if (!pending) return;
+                const r = (NEG.test(t) ? -0.8 : POS.test(t) ? 0.7 : 0.1) + (pending.lat && pending.lat < 5000 ? 0.1 : -0.1);
+                const adv = r - B.base; B.base += 0.1 * (r - B.base);
+                pol.update(pending.x, pending.a, pending.pi, adv); save(); pending = null;
+            };
+            V5.policy = pol; V5.recall = recall; V5.intent = intent; V5.loihi = loihi; V5.CR = CR;
+
+            // Último respaldo local: usa el LLM Transformer del navegador si está activo; si no, el respaldo anterior (Puter solo en escritorio)
+            const puter0 = arthurPuter; ARTHUR_MESH.usePuter = true;
+            arthurPuter = async function (msgs) {
+                if (V5.warm) throw new Error('modo sensible: respuesta local verificada');
+                if (TF.gst === 'ready') {
+                    const m = /INFORMACIÓN EN TIEMPO REAL DE LA MALLA: ([\s\S]*?)\nINSTRUCCIONES/.exec(msgs[0].content), lang = document.getElementById('langSelect').value;
+                    const o = await TF.gen([{ role: 'system', content: 'Eres Arthur, asistente erudito, ético y empático. Responde de forma concreta en el idioma ' + lang + '. ' + (m && m[1].trim() ? 'Contexto verificado: ' + m[1].slice(0, 1200) : '') }, { role: 'user', content: msgs[msgs.length - 1].content.slice(0, 600) }], { max_new_tokens: 220, do_sample: false });
+                    const g = o[0].generated_text, t = arthurClean(typeof g === 'string' ? g : g[g.length - 1].content);
+                    if (t) return t;
+                }
+                if (!ARTHUR_MOBILE) return puter0(msgs);
+                throw new Error('sin respaldo local');
+            };
+
+            const prev = executeMultiEndpointQuery;
+            executeMultiEndpointQuery = async function (messages, promptText) {
+                const text = messages[messages.length - 1].content, l2 = lng(), it = intent(text);
+                settle(text); tfWarm(); tfWarmGen();
+                if (it === 'crisis') { careUntil = Date.now() + 1800000; pending = null; V5.extra = ACOMP; return CR[l2] || CR.en; }
+                const care = Date.now() < careUntil, warm = care || it === 'emotional';
+                V5.warm = warm;
+                const c = rx => (text.match(rx) || []).length;
+                const rates = loihi.run([c(LEX[0]) * 400, c(LEX[1]) * 400, c(LEX[2]) * 400, c(LEX[3]) * 300], 32);
+                const x = [Math.min(1, rates[0] * 2), Math.min(1, text.split(/\s+/).length / 60), it === 'facts' ? 1 : 0];
+                let style = 0;
+                if (!warm) { const d = pol.act(x); style = d.a; pending = { x: x, a: d.a, pi: d.pi, lat: 0 }; } else pending = null;
+                const rc = warm ? '' : await recall(text);
+                V5.extra = care ? ACOMP : STY[style];
+                const m2 = messages.slice();
+                m2[0] = { role: 'system', content: messages[0].content + '\n[' + CORE + (care ? ' ' + ACOMP : ' ESTILO: ' + STY[style]) + (rc ? ' MEMORIA RELEVANTE (atención por fidelidad cuántica simulada): ' + rc : '') + ']' };
+                const t0 = Date.now(); let out;
+                try { out = await prev(m2, promptText); }
+                catch (e) { if (warm) return SUP[l2] || SUP.en; throw e; }
+                if (pending) pending.lat = Date.now() - t0;
+                if (!warm && out && out.length > 20) {
+                    const ent = { q: text.slice(0, 160), a: out.replace(/<<<PATCH>>>[\s\S]*?<<<END_PATCH>>>/g, '').slice(0, 240), v: emb(text) };
+                    B.mem.push(ent); save();
+                    tfEmbed([text.slice(0, 300)]).then(r => { if (r) { ent.e = r[0].map(x => Math.round(x * 1000) / 1000); save(); } });
+                }
+                return out;
+            };
+        })();
+    </script>
 </body>
 </html>
