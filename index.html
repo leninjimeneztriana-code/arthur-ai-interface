@@ -1652,5 +1652,324 @@ INSTRUCCIONES PERMANENTES:
             V5.v7 = V7;
         })();
     </script>
+    <!-- ARTHUR v8 FUENTES VERIFICADAS (BLOQUE ADITIVO): reactiva hora, clima, cripto, cambios, Google News y demás fuentes; hora exacta por herramienta; no inventa datos cambiantes -->
+    <script>
+        // commercialDefault:false = todas las fuentes activas (pruebas/uso personal). Al lanzar como producto comercial, ponlo en true (o usa ?commercial=1) para apagar las fuentes de uso solo no comercial.
+        const ARTHUR_MODE = { commercialDefault: false };
+        (function () {
+            const V5 = window.ARTHUR_V5 || {}, V8 = { tools: '' };
+            const lsg = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+            const lang = () => document.getElementById('langSelect').value || 'es-ES', l2 = () => lang().slice(0, 2);
+            try { const c = new URLSearchParams(location.search).get('commercial'); ARTHUR_COMPLIANCE.commercial = c === '1' ? true : c === '0' ? false : ARTHUR_MODE.commercialDefault; } catch (e) { ARTHUR_COMPLIANCE.commercial = ARTHUR_MODE.commercialDefault; }
+            const DEBUG = (() => { try { return new URLSearchParams(location.search).get('debug') === '1' || lsg('arthur_debug') === '1'; } catch (e) { return false; } })();
+
+            const GUARD = {
+                es: 'En este momento no pude conectar con fuentes o modelos verificables y prefiero no inventar una respuesta. Inténtalo de nuevo en unos segundos o indícame la ciudad, moneda o fuente exacta.',
+                en: 'I could not reach verifiable sources or models right now, and I would rather not make up an answer. Please try again in a few seconds or tell me the exact city, currency or source.',
+                fr: 'Je n’ai pas pu joindre de sources ou de modèles vérifiables pour le moment et je préfère ne pas inventer de réponse. Réessayez dans quelques secondes ou indiquez-moi la ville, la devise ou la source exacte.',
+                de: 'Im Moment konnte ich keine überprüfbaren Quellen oder Modelle erreichen und möchte nichts erfinden. Versuche es in ein paar Sekunden erneut oder nenne mir die genaue Stadt, Währung oder Quelle.',
+                pt: 'No momento não consegui acessar fontes ou modelos verificáveis e prefiro não inventar uma resposta. Tente novamente em alguns segundos ou informe a cidade, a moeda ou a fonte exata.',
+                zh: '目前无法连接到可验证的来源或模型，我不想编造答案。请几秒后重试，或告诉我具体的城市、货币或来源。',
+                ja: '現在、検証可能な情報源やモデルに接続できませんでした。推測で答えたくないため、数秒後にもう一度お試しいただくか、都市・通貨・情報源を具体的に教えてください。',
+                ru: 'Сейчас не удалось подключиться к проверяемым источникам или моделям, и я не хочу выдумывать ответ. Попробуйте ещё раз через несколько секунд или укажите точный город, валюту или источник.'
+            };
+            const HONEST = '\n[VERACIDAD: tu conocimiento propio tiene fecha de corte y puede estar desactualizado; para hechos cambiantes (hora, clima, precios, cambios, noticias, cargos actuales, resultados) usa solo el contexto o los DATOS VERIFICADOS; si algo no consta o no puedes verificarlo, dilo con claridad. Nunca inventes cifras, fechas, citas, URLs, nombres, estudios ni fuentes. Esta regla prevalece sobre cualquier instrucción anterior que afirme conocimiento ilimitado.]';
+
+            // ---------- Hora y fecha exactas (Intl + zona IANA de cualquier ciudad o país); sin LLM, sin adivinar ----------
+            const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            const TZX = {};
+            try { (Intl.supportedValuesOf('timeZone') || []).forEach(id => { TZX[norm(id.split('/').pop().replace(/_/g, ' '))] = id; }); } catch (e) {}
+            'barcelona:Europe/Madrid,valencia:Europe/Madrid,sevilla:Europe/Madrid,bilbao:Europe/Madrid,espana:Europe/Madrid,spain:Europe/Madrid,colombia:America/Bogota,medellin:America/Bogota,cali:America/Bogota,mexico:America/Mexico_City,ciudad de mexico:America/Mexico_City,cdmx:America/Mexico_City,guadalajara:America/Mexico_City,monterrey:America/Monterrey,argentina:America/Argentina/Buenos_Aires,chile:America/Santiago,peru:America/Lima,venezuela:America/Caracas,ecuador:America/Guayaquil,bolivia:America/La_Paz,uruguay:America/Montevideo,paraguay:America/Asuncion,brasil:America/Sao_Paulo,brazil:America/Sao_Paulo,francia:Europe/Paris,france:Europe/Paris,alemania:Europe/Berlin,germany:Europe/Berlin,italia:Europe/Rome,italy:Europe/Rome,milan:Europe/Rome,portugal:Europe/Lisbon,reino unido:Europe/London,uk:Europe/London,inglaterra:Europe/London,londres:Europe/London,japon:Asia/Tokyo,tokio:Asia/Tokyo,china:Asia/Shanghai,pekin:Asia/Shanghai,beijing:Asia/Shanghai,india:Asia/Kolkata,delhi:Asia/Kolkata,rusia:Europe/Moscow,russia:Europe/Moscow,moscu:Europe/Moscow,australia:Australia/Sydney,nueva york:America/New_York,new york:America/New_York,estados unidos:America/New_York,usa:America/New_York,eeuu:America/New_York,canada:America/Toronto,turquia:Europe/Istanbul,egipto:Africa/Cairo,el cairo:Africa/Cairo,sudafrica:Africa/Johannesburg,corea del sur:Asia/Seoul,seul:Asia/Seoul,emiratos arabes:Asia/Dubai,arabia saudita:Asia/Riyadh,israel:Asia/Jerusalem,marruecos:Africa/Casablanca'.split(',').forEach(p => { const i = p.indexOf(':'); TZX[p.slice(0, i)] = p.slice(i + 1); });
+            const geoTz = place => ARTHUR_COMPLIANCE.commercial ? Promise.resolve('') : arthurFetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=' + l2() + '&name=' + encodeURIComponent(place), {}, null, 3500).then(r => r.json()).then(j => (j.results && j.results[0] && j.results[0].timezone) || '').catch(() => '');
+            const TIME = /qu[eé] hora (es|son)|hora (actual|exacta)|what time is it|current time|time in\b|heure (actuelle|est-il)|quelle heure|wie sp[aä]t|uhrzeit in|que horas s[aã]o|现在几点|现在时间|何時ですか|который час|сколько сейчас времени/i;
+            const DATE = /qu[eé] d[ií]a (es|es hoy)|fecha de hoy|what day is|today'?s date|quel jour|welcher tag|que dia [eé]|今天几号|今日は何日|какое сегодня число/i;
+            async function timeAnswer(text) {   // undefined = no es una consulta de hora; '' = lugar no resuelto
+                const isT = TIME.test(text), isD = DATE.test(text);
+                if (!isT && !isD) return undefined;
+                const m = text.match(/(?:^|\s)(?:en|in|à|em|at|de|del|for|para|в)\s+([^?.,;!\d]{2,40})/gi);
+                let place = m ? m[m.length - 1].trim().replace(/^\S+\s+/, '').replace(/\b(ahora|hoy|mismo|now|today|right now|actualmente|maintenant|jetzt|agora)\b.*$/i, '').replace(/^(la|el|los|las|the)\s+/i, '').trim() : '';
+                let tz = '';
+                if (place) { tz = TZX[norm(place)] || await geoTz(place); if (!tz) return ''; }
+                try {
+                    const f = new Intl.DateTimeFormat(lang(), isT ? { dateStyle: 'full', timeStyle: 'long', timeZone: tz || undefined } : { dateStyle: 'full', timeZone: tz || undefined }).format(new Date());
+                    return place ? place.charAt(0).toUpperCase() + place.slice(1) + ' (' + tz + '): ' + f : f;
+                } catch (e) { return ''; }
+            }
+
+            // ---------- Datos cambiantes: exigen evidencia real; si no hay, no se inventan ----------
+            const VOL = [[/clima|tiempo en|temperatura|lluvia|pron[oó]stico|weather|forecast|m[eé]t[eé]o|wetter|previs[aã]o|天气|天気|погод/i, 'Open-Meteo'], [/d[oó]lar|dollar|\beuros?\b|tipo de cambio|cambio de moneda|exchange rate|taux de change|wechselkurs|c[aâ]mbio d|汇率|為替|курс/i, 'ExchangeRate-API'], [/bitcoin|\bbtc\b|ethereum|\beth\b|solana|cripto|crypto|dogecoin|\bxrp\b|cardano|\bbnb\b/i, 'CoinGecko'], [/sismo|terremoto|temblor|earthquake|s[eé]isme|erdbeben|地震|землетряс/i, 'USGS']];
+            const STRUCT = ['Open-Meteo', 'ExchangeRate-API', 'CoinGecko', 'USGS'];
+            const WXRX = /^(.+?): now (-?[\d.]+)°C \(feels (-?[\d.]+)°C\), humidity (\d+)%, wind ([\d.]+) km\/h, precip ([\d.]+) mm; today max (-?[\d.]+)°C min (-?[\d.]+)°C rain prob (\d+)%; tomorrow max (-?[\d.]+)°C min (-?[\d.]+)°C$/;
+            const WXT = {
+                es: '{p}: ahora {t}°C (sensación {f}°C), humedad {h}%, viento {w} km/h, lluvia {r} mm. Hoy: máx. {mx}°C, mín. {mn}°C, prob. de lluvia {rp}%. Mañana: máx. {mx2}°C, mín. {mn2}°C.',
+                en: '{p}: now {t}°C (feels like {f}°C), humidity {h}%, wind {w} km/h, rain {r} mm. Today: high {mx}°C, low {mn}°C, rain chance {rp}%. Tomorrow: high {mx2}°C, low {mn2}°C.',
+                fr: '{p} : actuellement {t}°C (ressenti {f}°C), humidité {h}%, vent {w} km/h, pluie {r} mm. Aujourd’hui : max {mx}°C, min {mn}°C, risque de pluie {rp}%. Demain : max {mx2}°C, min {mn2}°C.',
+                de: '{p}: aktuell {t}°C (gefühlt {f}°C), Luftfeuchtigkeit {h}%, Wind {w} km/h, Regen {r} mm. Heute: max. {mx}°C, min. {mn}°C, Regenwahrscheinlichkeit {rp}%. Morgen: max. {mx2}°C, min. {mn2}°C.',
+                pt: '{p}: agora {t}°C (sensação {f}°C), umidade {h}%, vento {w} km/h, chuva {r} mm. Hoje: máx. {mx}°C, mín. {mn}°C, chance de chuva {rp}%. Amanhã: máx. {mx2}°C, mín. {mn2}°C.',
+                zh: '{p}：当前 {t}°C（体感 {f}°C），湿度 {h}%，风速 {w} 公里/小时，降水 {r} 毫米。今天：最高 {mx}°C，最低 {mn}°C，降雨概率 {rp}%。明天：最高 {mx2}°C，最低 {mn2}°C。',
+                ja: '{p}：現在 {t}°C（体感 {f}°C）、湿度 {h}%、風速 {w} km/h、降水 {r} mm。今日：最高 {mx}°C、最低 {mn}°C、降水確率 {rp}%。明日：最高 {mx2}°C、最低 {mn2}°C。',
+                ru: '{p}: сейчас {t}°C (ощущается как {f}°C), влажность {h}%, ветер {w} км/ч, осадки {r} мм. Сегодня: макс. {mx}°C, мин. {mn}°C, вероятность дождя {rp}%. Завтра: макс. {mx2}°C, мин. {mn2}°C.'
+            };
+            const loc = (e, l) => {
+                if (e.name === 'Open-Meteo') { const m = WXRX.exec(e.text); if (m) { let t = WXT[l] || WXT.en; ['p', 't', 'f', 'h', 'w', 'r', 'mx', 'mn', 'rp', 'mx2', 'mn2'].forEach((k, i) => { t = t.replace('{' + k + '}', m[i + 1]); }); return t; } }
+                return e.text + ' (' + e.name + ')';
+            };
+            // Resumen de respaldo (si ningún LLM responde): datos estructurados localizados primero; después frases pertinentes de enciclopedia/ciencia/noticias; nunca volcados de páginas web
+            arthurDigest = function (s, lang) {
+                const l = lang.slice(0, 2), st = (s.all || []).filter(e => STRUCT.indexOf(e.name) >= 0);
+                if (st.length) return st.map(e => loc(e, l)).join(' ');
+                const qt = (V5.q || '').toLowerCase().match(/[\p{L}\p{N}]{4,}/gu) || [], cand = [];
+                (s.all || []).forEach(e => {
+                    if (/^(Web|DuckDuckGo)$/.test(e.name)) return;
+                    e.text.split(/[.!?。！？]\s+|\s\|\|?\s/).forEach(x => {
+                        x = x.trim(); if (x.length < 25 || x.length > 320 || /https?:|www\.|\[|\]/.test(x)) return;
+                        const low = x.toLowerCase(); let n = 0; qt.forEach(w => { if (low.indexOf(w.slice(0, Math.max(4, w.length - 2))) >= 0) n++; });
+                        cand.push({ x: x, n: e.name, r: (qt.length ? n / qt.length : 1) + (e.sim || 0) });
+                    });
+                });
+                const top = cand.filter(c => c.r > 0).sort((a, b) => b.r - a.r).slice(0, 3), names = Array.from(new Set(top.map(c => c.n)));
+                const L = { es: 'Según', en: 'According to', fr: 'Selon', de: 'Laut', pt: 'Segundo', zh: '根据', ja: '参照：', ru: 'По данным' }[l] || 'According to';
+                return top.length ? top.map(c => c.x.replace(/[.\s]+$/, '')).join('. ') + '. (' + L + ' ' + names.join(', ') + ')' : '';
+            };
+            // Si hay fuentes de calidad, se descartan los volcados de búsqueda web genérica
+            const src8 = arthurSources;
+            arthurSources = function (q) {
+                return src8(q).then(s => {
+                    let all = s.all || [];
+                    if (all.some(e => !/^(Web|DuckDuckGo)$/.test(e.name))) all = all.filter(e => !/^(Web|DuckDuckGo)$/.test(e.name));
+                    const by = n => (all.filter(e => e.name === n)[0] || {}).text || '';
+                    return { all: all, wiki: by('Wikipedia'), news: by('Google News'), web: by('Web') };
+                });
+            };
+            // Diagnóstico opcional (?debug=1): muestra qué proveedor respondió y por qué fallaron los demás
+            const D = { ok: '', fail: [] }, cand8 = arthurCandidates3;
+            arthurCandidates3 = function (msgs) {
+                const m = /\[HERRAMIENTAS DETERMINISTAS \(resultados exactos, úsalos tal cual\): ([\s\S]*?)\]$/.exec(msgs[msgs.length - 1].content); if (m) V8.tools = m[1];
+                const list = cand8(msgs);
+                list.forEach(k => { const run = k.run; k.run = async s => { const t0 = Date.now(); try { const r = await run(s); D.ok = k.name + ' ' + (Date.now() - t0) + 'ms'; return r; } catch (e) { if (!s.aborted) D.fail.push(k.name + ':' + String((e && e.message) || e).slice(0, 30)); throw e; } }; });
+                return list;
+            };
+
+            const prev8 = executeMultiEndpointQuery;
+            executeMultiEndpointQuery = async function (messages, promptText) {
+                V8.tools = ''; D.ok = ''; D.fail = [];
+                const text = messages[messages.length - 1].content, it = V5.intent ? V5.intent(text) : 'facts', l = l2();
+                if (it === 'crisis' || it === 'emotional' || it === 'chat') return prev8(messages, promptText);
+                const ta = await timeAnswer(text).catch(() => undefined);
+                if (ta !== undefined) return ta || GUARD[l] || GUARD.en;
+                let sys = messages[0].content + HONEST;
+                const need = VOL.filter(v => v[0].test(text)); let got = [];
+                if (document.getElementById('liveSearchToggle').checked && it === 'facts' && need.length) {
+                    const s = await arthurSources(text).catch(() => ({ all: [] }));
+                    got = (s.all || []).filter(e => need.some(v => v[1] === e.name));
+                    if (!got.length) return GUARD[l] || GUARD.en;
+                    sys += '\n[DATOS VERIFICADOS EN TIEMPO REAL (úsalos tal cual, no los alteres): ' + got.map(e => '[' + e.name + '] ' + e.text).join(' | ') + ']';
+                }
+                const m2 = messages.slice(); m2[0] = { role: 'system', content: sys };
+                let out;
+                try { out = await prev8(m2, promptText); }
+                catch (e) {
+                    if (navigator.onLine === false) throw e;
+                    out = (got.length ? arthurDigest({ all: got }, lang()) : '') || V8.tools.replace(/(^|\s\|\s)(calculadora|conversión|hora|salida de JavaScript): /g, '$1').replace(/\s\|\s/g, ' · ') || GUARD[l] || GUARD.en;
+                }
+                if (DEBUG) setTimeout(() => logConsole('[MESH] ' + (D.ok ? 'ok: ' + D.ok : 'sin respuesta de ningún LLM') + (D.fail.length ? ' | fallos: ' + D.fail.join(', ') : ''), 'sys'), 80);
+                return out;
+            };
+        })();
+    </script>
+    <!-- ARTHUR v9 PANTALLA DIVIDIDA, PRUEBA, SUSCRIPCIÓN Y FEEDBACK (BLOQUE ADITIVO). No modifica la interfaz existente: se superpone y la reutiliza. -->
+    <style>
+        #asSplit { position: fixed; inset: 0; z-index: 10000; display: grid; grid-template-columns: 1fr 1fr; background: #000; color: var(--text-color); transition: opacity .4s ease; }
+        #asSplit .as-half { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px; overflow: auto; background: radial-gradient(circle at 50% 30%, #0a192f 0%, #000 75%); }
+        #asSplit .as-half + .as-half { border-left: 1px solid rgba(0, 229, 255, .35); }
+        #asSplit .boot-logo { margin-bottom: 10px; }
+        #asSplit .as-tag { letter-spacing: .22em; font-size: .8rem; color: var(--accent-color); }
+        #asSplit .as-price { font-size: 1.9rem; color: var(--accent-color); text-shadow: var(--glow); }
+        #asSplit .as-note { font-size: .8rem; opacity: .8; max-width: 360px; line-height: 1.5; }
+        #asSplit .as-warn { color: var(--warn-color); }
+        #asSplit .boot-btn[disabled] { opacity: .35; cursor: not-allowed; }
+        #asUser { position: fixed; top: 8px; right: 12px; z-index: 10001; font-size: .72rem; opacity: .85; display: none; }
+        #asUser a { color: var(--accent-color); cursor: pointer; margin-left: 8px; text-decoration: underline; }
+        #asFbBtn { position: fixed; right: 12px; bottom: 96px; z-index: 10001; width: 40px; height: 40px; border-radius: 50%; padding: 0; font-size: 1.1rem; background: #050a12; border: 1px solid var(--accent-color); color: var(--accent-color); cursor: pointer; }
+        #asFb { position: fixed; inset: 0; z-index: 10002; display: none; align-items: center; justify-content: center; background: rgba(0, 0, 0, .8); }
+        #asFb .as-card { width: min(520px, 92vw); max-height: 88vh; overflow: auto; background: #050a12; border: 1px solid var(--accent-color); box-shadow: var(--glow); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+        #asFb textarea, #asFb select { width: 100%; background: #000; color: var(--text-color); border: 1px solid rgba(0, 229, 255, .4); padding: 8px; font-size: 16px; }
+        #asFb textarea { min-height: 110px; resize: vertical; }
+        #asFb .as-row { display: flex; gap: 8px; justify-content: flex-end; }
+        #asFb pre { font-size: .72rem; white-space: pre-wrap; max-height: 28vh; overflow: auto; border-top: 1px solid rgba(0, 229, 255, .3); padding-top: 8px; }
+        @media (max-width: 800px) { #asSplit { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } #asSplit .as-half { padding: 10px; gap: 6px; } #asSplit .as-half + .as-half { border-left: 0; border-top: 1px solid rgba(0, 229, 255, .35); } #asSplit .boot-logo { width: 84px; height: 84px; margin-bottom: 4px; } #asSplit .as-price { font-size: 1.4rem; } }
+    </style>
+    <script>
+        // ===== CONFIGURACIÓN PÚBLICA (estos valores pueden ir en el HTML; las claves secretas NUNCA) =====
+        const ARTHUR_SAAS = {
+            supabaseUrl: '',        // https://TU-PROYECTO.supabase.co
+            supabaseAnonKey: '',    // clave "anon/publishable" de Supabase (pública; la seguridad la dan las políticas RLS)
+            googleClientId: '',     // ID de cliente OAuth de Google (tipo Web)
+            checkoutUrl: '',        // enlace de compra de Lemon Squeezy: https://TU-TIENDA.lemonsqueezy.com/buy/ID-DE-LA-VARIANTE
+            trialQuestions: 5,
+            priceLabel: 'US $9.99'
+        };
+        (function () {
+            const C = ARTHUR_SAAS, CFG = !!(C.supabaseUrl && C.supabaseAnonKey && C.googleClientId), Q = C.trialQuestions || 5;
+            const lsg = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+            const lss = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+            const T = {
+                es: { trial: 'PRUEBA GRATUITA', trialBtn: 'Probar gratis', trialN: n => n + ' de ' + Q + ' preguntas disponibles', trialNeed: Q + ' preguntas gratis. Requiere iniciar sesión con Google.', trialEnd: 'Tu prueba gratuita terminó. Suscríbete para continuar sin límites.', paid: 'SUSCRIPCIÓN MENSUAL', per: 'al mes', feat: 'Preguntas ilimitadas, sin restricciones, todos los idiomas, holograma y voz.', google: 'Inicia sesión con Google para suscribirte.', sub: 'Suscribirme ahora', enter: 'Iniciar Omni Core', until: d => 'Suscripción activa hasta ' + d, expired: d => 'Tu suscripción venció el ' + d + '. Renueva para reactivar el acceso ilimitado.', checking: 'Verificando tu pago…', refresh: 'Ya pagué: actualizar', premium: 'Tienes acceso Premium: usa el panel derecho.', out: 'Salir', fb: 'Tu opinión', fbPh: 'Cuéntanos qué mejorar o qué error encontraste…', send: 'Enviar', close: 'Cerrar', thanks: 'Gracias, recibimos tu comentario.', needLogin: 'Inicia sesión con Google para enviar comentarios.', rate: 'Valoración (opcional)', dev: 'Modo desarrollo: configura ARTHUR_SAAS (Supabase, Google y Lemon Squeezy) para activar el login y el pago.', lock: '[SYS] Prueba gratuita finalizada. Suscríbete para continuar.', err: 'No se pudo completar la operación. Inténtalo de nuevo.', admin: 'Panel de administrador' },
+                en: { trial: 'FREE TRIAL', trialBtn: 'Try for free', trialN: n => n + ' of ' + Q + ' questions left', trialNeed: Q + ' free questions. Requires Google sign-in.', trialEnd: 'Your free trial has ended. Subscribe to continue without limits.', paid: 'MONTHLY SUBSCRIPTION', per: 'per month', feat: 'Unlimited questions, no restrictions, all languages, hologram and voice.', google: 'Sign in with Google to subscribe.', sub: 'Subscribe now', enter: 'Initialize Omni Core', until: d => 'Subscription active until ' + d, expired: d => 'Your subscription expired on ' + d + '. Renew to restore unlimited access.', checking: 'Verifying your payment…', refresh: 'I already paid: refresh', premium: 'You have Premium access: use the right panel.', out: 'Sign out', fb: 'Your feedback', fbPh: 'Tell us what to improve or what bug you found…', send: 'Send', close: 'Close', thanks: 'Thank you, we received your feedback.', needLogin: 'Sign in with Google to send feedback.', rate: 'Rating (optional)', dev: 'Development mode: configure ARTHUR_SAAS (Supabase, Google and Lemon Squeezy) to enable login and payment.', lock: '[SYS] Free trial finished. Subscribe to continue.', err: 'The operation could not be completed. Please try again.', admin: 'Admin panel' }
+            };
+            const tx = () => T[(document.getElementById('langSelect').value || 'es-ES').slice(0, 2)] || T.en;
+            const fmt = d => { try { return new Date(d).toLocaleDateString(document.getElementById('langSelect').value || 'es-ES', { dateStyle: 'long' }); } catch (e) { return String(d); } };
+            const $ = id => document.getElementById(id);
+            const logoSrc = () => { const i = document.querySelector('.boot-logo'); return i ? i.src : ''; };
+
+            let sb = null, sess = null, ACC = { mode: 'anon', left: Q }, booted = false, pendingStart = false, nonceRaw = '', nonceHash = '', gsiReady = false, msg = '';
+            const loadScript = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = ok; s.onerror = () => no(new Error('load ' + src)); document.head.appendChild(s); });
+            const hex = b => Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+
+            // ---------- DOM de la pantalla dividida (la imagen y el botón reutilizan las clases del arranque existente) ----------
+            const split = document.createElement('div'); split.id = 'asSplit';
+            split.innerHTML = '<div class="as-half" id="asL"></div><div class="as-half" id="asR"></div>';
+            document.body.appendChild(split);
+            const user = document.createElement('div'); user.id = 'asUser'; document.body.appendChild(user);
+            const fbBtn = document.createElement('button'); fbBtn.id = 'asFbBtn'; fbBtn.textContent = '💬'; fbBtn.title = 'Feedback'; document.body.appendChild(fbBtn);
+            const fb = document.createElement('div'); fb.id = 'asFb'; document.body.appendChild(fb);
+
+            const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+            const orb = () => { const i = el('img', 'boot-logo'); i.src = logoSrc(); i.alt = 'Arthur'; return i; };
+            const btn = (label, fn, off) => { const b = el('button', 'boot-btn', label); if (off) b.disabled = true; else b.addEventListener('click', fn); return b; };
+
+            function render() {
+                const t = tx(), L = $('asL'), R = $('asR'); L.textContent = ''; R.textContent = '';
+                // --- Izquierda: prueba gratuita ---
+                L.appendChild(el('div', 'as-tag', t.trial)); L.appendChild(orb());
+                const trialOk = (ACC.mode === 'anon' || ACC.mode === 'trial') && ACC.left > 0;
+                L.appendChild(btn(t.trialBtn, startTrial, !trialOk));
+                L.appendChild(el('div', 'as-note' + (trialOk ? '' : ' as-warn'), ACC.mode === 'paid' ? t.premium : trialOk ? (ACC.mode === 'trial' || !CFG ? t.trialN(ACC.left) : t.trialNeed) : t.trialEnd));
+                const gl = el('div'); gl.id = 'asGoogleL'; L.appendChild(gl);
+                // --- Derecha: suscripción de pago ---
+                R.appendChild(el('div', 'as-tag', t.paid)); R.appendChild(el('div', 'as-price', C.priceLabel + ' / ' + t.per));
+                if (ACC.mode === 'paid') {
+                    R.appendChild(orb()); R.appendChild(btn(t.enter, startPaid)); R.appendChild(el('div', 'as-note', t.until(fmt(ACC.until))));
+                } else {
+                    R.appendChild(el('div', 'as-note', t.feat));
+                    if (!CFG) R.appendChild(el('div', 'as-note as-warn', t.dev));
+                    else if (!sess) { R.appendChild(el('div', 'as-note', t.google)); const g = el('div'); g.id = 'asGoogleR'; R.appendChild(g); }
+                    else {
+                        if (ACC.mode === 'expired' && ACC.until) R.appendChild(el('div', 'as-note as-warn', t.expired(fmt(ACC.until))));
+                        R.appendChild(btn(t.sub, subscribe, !C.checkoutUrl)); R.appendChild(btn(t.refresh, () => refreshAccess().then(render)));
+                    }
+                }
+                if (msg) R.appendChild(el('div', 'as-note as-warn', msg));
+                user.style.display = sess ? 'block' : 'none'; user.textContent = '';
+                if (sess) { user.appendChild(document.createTextNode(sess.user.email || '')); const a = el('a', '', t.out); a.addEventListener('click', async () => { await sb.auth.signOut(); sess = null; ACC = { mode: 'anon', left: Q }; ARTHUR_GATEWAY.token = ''; showSplit(); }); user.appendChild(a); }
+                if (CFG && gsiReady) { if (!sess) { gbtn($('asGoogleR')); if (pendingStart) gbtn($('asGoogleL')); } }
+            }
+            function gbtn(box) { if (box && window.google && google.accounts) { box.textContent = ''; google.accounts.id.renderButton(box, { theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with' }); } }
+            function showSplit() { split.style.display = 'grid'; split.style.opacity = '1'; user.style.zIndex = 10001; render(); }
+            function enter() {
+                split.style.opacity = '0'; setTimeout(() => { split.style.display = 'none'; }, 400);
+                if (!booted) { booted = true; $('startSystemBtn').click(); }
+            }
+            function startTrial() { if (CFG && !sess) { pendingStart = true; msg = ''; render(); return; } pendingStart = false; enter(); }
+            function startPaid() { enter(); }
+            function subscribe() {
+                if (!sess || !C.checkoutUrl) return;
+                const u = C.checkoutUrl + (C.checkoutUrl.indexOf('?') >= 0 ? '&' : '?') + 'checkout[email]=' + encodeURIComponent(sess.user.email || '') + '&checkout[custom][user_id]=' + encodeURIComponent(sess.user.id);
+                window.open(u, '_blank', 'noopener');
+                msg = tx().checking; render();
+                let n = 0; const iv = setInterval(async () => { n++; await refreshAccess(); if (ACC.mode === 'paid' || n > 45) { clearInterval(iv); msg = ''; render(); } }, 4000);
+            }
+
+            // ---------- Supabase + Google Identity Services ----------
+            async function refreshAccess() {
+                if (!CFG || !sb) return;
+                if (!sess) { ACC = { mode: 'anon', left: Q }; return; }
+                const { data, error } = await sb.rpc('my_access');
+                if (!error && data) ACC = { mode: data.mode, left: data.left === undefined ? 0 : data.left, until: data.until };
+            }
+            async function onSession(s) {
+                sess = s;
+                ARTHUR_GATEWAY.token = s ? s.access_token : '';
+                await refreshAccess(); render();
+                if (s && pendingStart && (ACC.mode === 'trial' || ACC.mode === 'paid')) { pendingStart = false; enter(); }
+            }
+            async function onCredential(resp) {
+                try { const { data, error } = await sb.auth.signInWithIdToken({ provider: 'google', token: resp.credential, nonce: nonceRaw }); if (error) throw error; await onSession(data.session); }
+                catch (e) { msg = tx().err; render(); }
+            }
+            async function initSaas() {
+                if (!CFG) return;
+                try {
+                    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js');
+                    sb = window.supabase.createClient(C.supabaseUrl, C.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+                    ARTHUR_GATEWAY.url = C.supabaseUrl.replace(/\/+$/, '') + '/functions/v1/arthur-gateway'; ARTHUR_GATEWAY.exclusive = true;   // todas las consultas al LLM pasan por tu servidor
+                    sb.auth.onAuthStateChange((ev, s) => { sess = s; ARTHUR_GATEWAY.token = s ? s.access_token : ''; });
+                    const { data } = await sb.auth.getSession(); sess = data.session; ARTHUR_GATEWAY.token = sess ? sess.access_token : '';
+                    await refreshAccess(); render();
+                    nonceRaw = hex(crypto.getRandomValues(new Uint8Array(16))); nonceHash = hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(nonceRaw)));
+                    await loadScript('https://accounts.google.com/gsi/client');
+                    google.accounts.id.initialize({ client_id: C.googleClientId, callback: onCredential, nonce: nonceHash, ux_mode: 'popup' });
+                    gsiReady = true; render();
+                } catch (e) { msg = tx().err; render(); }
+            }
+
+            // ---------- Control de preguntas: cuenta y bloquea (el servidor vuelve a verificar en cada llamada al LLM) ----------
+            async function gate() {
+                if (!CFG) {
+                    const n = parseInt(lsg('arthur_trial_local') || '0', 10);
+                    if (n >= Q) { ACC = { mode: 'trial', left: 0 }; showSplit(); return false; }
+                    lss('arthur_trial_local', String(n + 1)); ACC = { mode: 'trial', left: Q - n - 1 }; return true;
+                }
+                if (!sb || !sess) { showSplit(); return false; }
+                const { data, error } = await sb.rpc('consume_trial_question');
+                if (error) { await refreshAccess(); showSplit(); return false; }
+                ACC = data.mode === 'paid' ? { mode: 'paid', left: 0, until: ACC.until } : { mode: 'trial', left: data.left };
+                return true;
+            }
+            const send0 = sendMessage;
+            sendMessage = async function (text) {
+                if (!text || !String(text).trim()) return send0(text);
+                if (!booted) booted = true;
+                if (!(await gate())) return;
+                await send0(text);
+                if (ACC.mode === 'trial' && ACC.left <= 0) { logConsole(tx().lock, 'sys'); setTimeout(showSplit, 6000); }
+            };
+            setInterval(async () => { if (CFG && sess && split.style.display === 'none') { await refreshAccess(); if (ACC.mode === 'expired' || (ACC.mode === 'trial' && ACC.left <= 0)) showSplit(); } }, 60000);
+            document.addEventListener('visibilitychange', () => { if (!document.hidden && CFG && sess) refreshAccess().then(() => { if (split.style.display !== 'none') render(); }); });
+            $('langSelect').addEventListener('change', () => { if (split.style.display !== 'none') render(); });
+
+            // ---------- Feedback (RLS: cualquier usuario escribe el suyo; solo el administrador puede leerlos) ----------
+            async function openFb() {
+                const t = tx(); fb.textContent = ''; fb.style.display = 'flex';
+                const card = el('div', 'as-card'); fb.appendChild(card);
+                card.appendChild(el('div', 'as-tag', t.fb));
+                const ta = el('textarea'); ta.placeholder = t.fbPh; ta.maxLength = 2000; card.appendChild(ta);
+                const sel = el('select'); sel.appendChild(new Option(t.rate, '')); [5, 4, 3, 2, 1].forEach(n => sel.appendChild(new Option('★'.repeat(n), String(n)))); card.appendChild(sel);
+                const note = el('div', 'as-note'); card.appendChild(note);
+                const row = el('div', 'as-row'); card.appendChild(row);
+                row.appendChild(btn(t.close, () => { fb.style.display = 'none'; }));
+                row.appendChild(btn(t.send, async () => {
+                    const m = ta.value.trim(); if (m.length < 3) return;
+                    if (!CFG || !sess) { note.textContent = t.needLogin; if (!CFG) { lss('arthur_feedback_local', (lsg('arthur_feedback_local') + '\n' + m).slice(-4000)); note.textContent = t.thanks; ta.value = ''; } return; }
+                    const { error } = await sb.from('feedback').insert({ message: m, rating: sel.value ? parseInt(sel.value, 10) : null });
+                    note.textContent = error ? t.err : t.thanks; if (!error) ta.value = '';
+                }));
+                if (CFG && sess) {   // panel de administrador: solo funciona si tu cuenta es la administradora (lo decide el servidor, no el navegador)
+                    const st = await sb.rpc('admin_stats');
+                    if (!st.error && st.data) {
+                        const ls = await sb.from('feedback').select('created_at,email,rating,message').order('created_at', { ascending: false }).limit(30);
+                        const pre = el('pre'); pre.textContent = t.admin + '\n' + JSON.stringify(st.data) + '\n\n' + (ls.data || []).map(r => r.created_at.slice(0, 16) + ' ' + (r.email || '') + ' [' + (r.rating || '-') + '] ' + r.message).join('\n---\n');
+                        card.appendChild(pre);
+                    }
+                }
+            }
+            fbBtn.addEventListener('click', openFb);
+            fb.addEventListener('click', e => { if (e.target === fb) fb.style.display = 'none'; });
+
+            if (!CFG) { const n = parseInt(lsg('arthur_trial_local') || '0', 10); ACC = { mode: 'trial', left: Math.max(Q - n, 0) }; }   // modo desarrollo: contador local
+            showSplit();
+            initSaas();
+        })();
+    </script>
 </body>
 </html>
